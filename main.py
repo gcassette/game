@@ -78,7 +78,7 @@ class Bullet(pygame.sprite.Sprite):
     def update(self):
         self.pos += self.velocity
         self.rect.center = (round(self.pos.x), round(self.pos.y))
-        if not screem_rect.colliderect(self.rect):
+        if not screen_rect.colliderect(self.rect):
             self.kill()
 # Initialization
 pygame.init()
