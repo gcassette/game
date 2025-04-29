@@ -26,9 +26,20 @@ class Player(pygame.sprite.Sprite):
             self.speed_y = -1
         if keys[pygame.K_DOWN]:
             self.speed_y = 1
+            
         # Update position
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
+
+        # Keep inside window
+        if self.rect.left < 0:
+            self.rect.left = 0
+        if self.rect.right > 800:
+            self.rect.right = 800
+        if self.rect.top < 0:
+            self.rect.top = 0
+        if self.rect.bottom > 600:
+            self.rect.bottom = 600
 
 # Initialize Pygame
 pygame.init()
