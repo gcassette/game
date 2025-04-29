@@ -12,14 +12,9 @@ class Player(pygame.sprite.Sprite):
         self.direction = pygame.math.Vector2(0, 0)
         self.move_x = 0
         self.move_y = 0
-        self.total_move_x = 0
-        self.total_move_y = 0
 
     def update(self):
         keys = pygame.key.get_pressed()
-
-        # 移動前座標は小数で保存
-        old_x, old_y = self.pos.x, self.pos.y
 
         self.direction.x = 0
         self.direction.y = 0
@@ -53,14 +48,6 @@ class Player(pygame.sprite.Sprite):
         self.pos.x = max(0, min(800, self.pos.x))
         self.pos.y = max(0, min(600, self.pos.y))
 
-        new_x, new_y = self.pos.x, self.pos.y  # ここも小数！
-
-        self.move_x = new_x - old_x
-        self.move_y = new_y - old_y
-
-        self.total_move_x += abs(self.move_x)
-        self.total_move_y += abs(self.move_y)
-
 # Initialize Pygame
 pygame.init()
 font = pygame.font.SysFont(None, 36)
@@ -83,13 +70,8 @@ while running:
     all_sprites.draw(screen)
 
     # --- 移動距離を画面に出す ---
-    move_text = font.render(f"Move x: {player.move_x:.2f}, y: {player.move_y:.2f}", True, (0, 255, 0))
     direction_text = font.render(f"Direction x: {player.direction.x:.2f}, y: {player.direction.y:.2f}", True, (255, 255, 0))
-    total_move_text = font.render(f"Total Move x: {player.total_move_x:.2f}, y: {player.total_move_y:.2f}", True, (0, 0, 255))
-
-    screen.blit(move_text, (10, 30))         # 1行目
-    screen.blit(direction_text, (10, 70))     # 2行目
-    screen.blit(total_move_text, (10, 110))   # 3行目
+    screen.blit(direction_text, (0, 70))     # 2行目
 
     pygame.display.flip()
 
