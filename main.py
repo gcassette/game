@@ -6,8 +6,7 @@ import pygame
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface((50, 50))
-        self.image.fill((255, 0, 0))
+        self.image = pygame.image.load('assets//robot.png').convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.center = (400, 300)
         self.speed_x = 0
