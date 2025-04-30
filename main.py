@@ -1,6 +1,4 @@
 import pygame
-<<<<<<< Updated upstream
-=======
 import math
 from Enemy import Enemy
 from Life import Life
@@ -11,13 +9,6 @@ BULLET_SPEED = 10
 ROTATE_SPEED = 3  # 回転速度（度単位）
 screen_rect = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
 time_limit = 300
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
 # Define our square object and call super to
 # give it all the properties and methods of pygame.sprite.Sprite
@@ -25,18 +16,8 @@ time_limit = 300
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        self.image = pygame.image.load('assets//robot.png').convert_alpha()
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
         self.original_image = pygame.image.load('assets//calcium.png').convert_alpha()
         self.image = self.original_image.copy()
->>>>>>> Stashed changes
         self.rect = self.image.get_rect()
         self.rect.center = (400, 300)
         self.speed_x = 0
@@ -77,24 +58,18 @@ pygame.init()
 screen = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Hello Pygame")
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 # Create Life instance
 player_life = Life(heart_image_path="assets//heart.png", max_lives=5, position=(10, 10))
 player_life.gain_life()
 all_sprites = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
+font = pygame.font.SysFont(None, 36)  # Default font, size 36
 
->>>>>>> Stashed changes
 player = Player()
-all_sprites = pygame.sprite.Group()
+enemy = Enemy(screen)
 all_sprites.add(player)
+spriteEneies.add(enemy)
+all_sprites.add(spriteEneies)
 
 # Game loop
 running = True
@@ -110,18 +85,6 @@ while running:
     all_sprites.update()
     screen.fill((0, 0, 0))
     all_sprites.draw(screen)
-<<<<<<< Updated upstream
-    # Update the display using flip
-=======
-
-    #direction_text = font.render(f"Angle: {player.angle:.2f}", True, (255, 255, 0))
-    #screen.blit(direction_text, (10, 30))
-
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
 
     # Calculate the time elapsed
     elapsed_ms = pygame.time.get_ticks()
@@ -133,21 +96,6 @@ while running:
 
     player_life.draw(screen)
 
-    pygame.display.flip()
-    clock.tick(60)
->>>>>>> Stashed changes
-
-    # Calculate the time elapsed
-    elapsed_ms = pygame.time.get_ticks()
-    elapsed_sec = elapsed_ms // 1000
-    time_ramaining = time_limit - elapsed_sec
-    timer_text = font.render(f"Time: {time_ramaining}s", True, (255, 255, 255))
-
-    screen.blit(timer_text, (650, 10))
-
-    player_life.draw(screen)
-
->>>>>>> Stashed changes
     pygame.display.flip()
 
 # Quit Pygame
