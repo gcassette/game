@@ -1,5 +1,6 @@
 import pygame
 import math
+from Enemy import Enemy
 
 # Constants
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
@@ -90,7 +91,9 @@ all_sprites = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 
 player = Player()
+enemy = Enemy(screen)
 all_sprites.add(player)
+all_sprites.add(enemy)
 
 clock = pygame.time.Clock()
 running = True
@@ -100,6 +103,8 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
             player.shoot()
+        if event.type == Enemy.ENEMY_RETREAT_EVENT:
+            enemy.exit()
 
     all_sprites.update()
     screen.fill((0, 0, 0))
