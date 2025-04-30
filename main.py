@@ -62,6 +62,7 @@ class Player(pygame.sprite.Sprite):
         bullet = Bullet(self.rect.center, self.angle)
         all_sprites.add(bullet)
         bullets.add(bullet)
+        beam_sound.play()
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, pos, angle):
@@ -85,6 +86,21 @@ pygame.init()
 font = pygame.font.SysFont(None, 36)
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Hello Pygame")
+
+## BGMの設定
+# サウンドミキサーを初期化
+pygame.mixer.init()
+
+# 音楽ファイルを読み込み
+pygame.mixer.music.load("assets\土星ダンス.mp3")
+# 音楽をループ再生（-1は無限ループ）
+pygame.mixer.music.play(-1)
+# 音量を0.5に設定（0.0〜1.0の範囲）
+pygame.mixer.music.set_volume(0.05)
+
+beam_sound = pygame.mixer.Sound("assets/ビーム音.mp3")
+beam_sound.set_volume(0.05)  # お好みで音量調整
+
 
 all_sprites = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
