@@ -12,6 +12,9 @@ ROTATE_SPEED = 3  # 回転速度（度単位）
 screen_rect = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
 time_limit = 300
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -24,8 +27,11 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         self.image = pygame.image.load('assets//robot.png').convert_alpha()
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
         self.original_image = pygame.image.load('assets//calcium.png').convert_alpha()
@@ -73,7 +79,10 @@ pygame.display.set_caption("Hello Pygame")
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 # Create Life instance
@@ -109,7 +118,10 @@ while running:
     #screen.blit(direction_text, (10, 30))
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 
     # Calculate the time elapsed
     elapsed_ms = pygame.time.get_ticks()
