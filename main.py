@@ -105,8 +105,6 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
             player.shoot()
-        if event.type == Enemy.ENEMY_RETREAT_EVENT:
-            enemy.exit()
 
     all_sprites.update()
     screen.fill((0, 0, 0))
