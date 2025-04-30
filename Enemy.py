@@ -51,7 +51,7 @@ class Enemy(pygame.sprite.Sprite):
 
                 if self.phase == "entry":
                     self.phase = "wait"
-                    pygame.time.set_timer(pygame.USEREVENT + 1, 2000)  # 2秒待機後退場
+                    pygame.time.set_timer(self.ENEMY_RETREAT_EVENT, 2000)  # 2秒待機後退場
                 elif self.phase == "exit":
                     self.kill()
             else:
