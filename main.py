@@ -60,16 +60,22 @@ pygame.display.set_caption("Hello Pygame")
 
 # Create Life instance
 player_life = Life(heart_image_path="assets//heart.png", max_lives=5, position=(10, 10))
-player_life.gain_life()
+player_life.lose_life()
 all_sprites = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
+spriteEneies = pygame.sprite.Group()
 font = pygame.font.SysFont(None, 36)  # Default font, size 36
+# load background
+bg_image = pygame.image.load("assets//bg1.png").convert()
+
+
 
 player = Player()
 enemy = Enemy(screen)
 all_sprites.add(player)
 spriteEneies.add(enemy)
 all_sprites.add(spriteEneies)
+bg_x = 0
 
 # Game loop
 running = True
@@ -81,9 +87,10 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+    bg_x -= 1
+    screen.blit(bg_image, (bg_x, 0))
 
     all_sprites.update()
-    screen.fill((0, 0, 0))
     all_sprites.draw(screen)
 
     # Calculate the time elapsed
