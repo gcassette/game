@@ -105,8 +105,8 @@ while running:
     screen.fill((0, 0, 0))
     all_sprites.draw(screen)
 
-    direction_text = font.render(f"Angle: {player.angle:.2f}", True, (255, 255, 0))
-    screen.blit(direction_text, (10, 30))
+    #direction_text = font.render(f"Angle: {player.angle:.2f}", True, (255, 255, 0))
+    #screen.blit(direction_text, (10, 30))
 
     pygame.display.flip()
     clock.tick(60)
