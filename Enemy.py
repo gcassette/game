@@ -1,5 +1,6 @@
 import pygame
 import math
+from Bullet import Bullet
 
 Enemy_IMG_PATH = "Assets\\skull.png"
 DISTANCE_ARRIVAL_PERMISSION = 5.0
