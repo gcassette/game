@@ -49,19 +49,19 @@ class Enemy(pygame.sprite.Sprite):
             pass
 
     def behavior_script(self):
-        # 🔷 フェーズ: entry（出現 → 移動）
+        # フェーズ: entry（出現 → 移動）
         self.phase = "entry"
         self.setTarget(self.attackPosition)
         while not self.isArrived():
             self.moveStep()
             yield
 
-        # 🔷 フェーズ: attack（停止 → 2秒待機）
+        # フェーズ: attack（停止 → 2秒待機）
         self.phase = "attack"
         self.vx = self.vy = 0
         yield from self.wait_frames(FPS * 2)  # 2秒
 
-        # 🔷 フェーズ: exit（退場）
+        # フェーズ: exit（退場）
         self.phase = "exit"
         self.setTarget(self.dissapearancePosition)
         while not self.isArrived():
