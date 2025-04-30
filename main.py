@@ -88,12 +88,14 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Hello Pygame")
 
 all_sprites = pygame.sprite.Group()
+spriteEneies = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 
 player = Player()
 enemy = Enemy(screen)
 all_sprites.add(player)
-all_sprites.add(enemy)
+spriteEneies.add(enemy)
+all_sprites.add(spriteEneies)
 
 clock = pygame.time.Clock()
 running = True
