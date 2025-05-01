@@ -70,6 +70,10 @@ class Player(Character):
 
         self.move()
         self.image = pygame.transform.rotate(self.original_image, self.angle)
+         # ← 左に向いてるときだけ左右反転
+        if self.direction.x < 0:
+            self.image = pygame.transform.flip(self.image, True, False)
+
         self.rect = self.image.get_rect(center=self.rect.center)
 
     def shoot(self):
@@ -141,6 +145,7 @@ class WanderEnemy(Character):
         self.set_random_direction()
         self.fireball_timer = 0
         self.fireball_interval = 90  # 1.5秒ごと（FPS=60前提）
+        self.facing_left = True  # 左右反転状態を記録する変数
 
     def set_random_direction(self):
         directions = [
@@ -175,12 +180,25 @@ class WanderEnemy(Character):
                 self.move_counter = 0
                 self.phase = "wander"
          # 火の玉発射
+
+         # 左右反転状態を記録
+        if self.direction.x < 0:
+            self.image = pygame.transform.flip(self.original_image, True, False)
+            self.facing_left = False
+        else:
+            self.image = self.original_image.copy()
+            self.facing_left = True
+            
         self.fireball_timer += 1
-        if self.fireball_timer >= self.fireball_interval and self.direction.length_squared() > 0:
-            fireball = Fireball(self.rect.center, self.direction)
+        if self.fireball_timer >= self.fireball_interval:
+            direction = pygame.math.Vector2(-1, 0) if self.facing_left else pygame.math.Vector2(1, 0)
+            fireball = Fireball(self.rect.center, direction)
             all_sprites.add(fireball)
             enemy_fireballs.add(fireball)
             self.fireball_timer = 0
+
+        
+        
 
 
 
@@ -225,9 +243,11 @@ pygame.display.set_caption("Hello Pygame")
 pygame.mixer.init()
 pygame.mixer.music.load("assets/\u571f\u661f\u30c0\u30f3\u30b9.mp3")
 pygame.mixer.music.play(-1)
-pygame.mixer.music.set_volume(0.05)
+pygame.mixer.music.set_volume(0.02)
 beam_sound = pygame.mixer.Sound("assets/\u30d3\u30fc\u30e0\u97f3.mp3")
 beam_sound.set_volume(0.05)
+damage_sound = pygame.mixer.Sound("assets/レトロアクション_3.mp3")
+damage_sound.set_volume(0.05)
 player_life = Life(max_lives=5)
 background = Background(SCREEN_WIDTH, SCREEN_WIDTH, scroll_speed=1)
 
@@ -237,6 +257,7 @@ enemy_fireballs = pygame.sprite.Group()
 player = Player()
 enemy = Enemy()
 wander_enemy = WanderEnemy()
+enemies = pygame.sprite.Group()  # ← ここ追加
 all_sprites.add(player)
 all_sprites.add(enemy)
 all_sprites.add(wander_enemy)
@@ -262,6 +283,24 @@ while running:
     elapsed_sec = elapsed_ms // 1000
     time_ramaining = TIME_LIMIT - elapsed_sec
     timer_text = font.render(f"Time: {time_ramaining}s", True, (255, 255, 255))
+
+    # --- 衝突判定 ---
+
+    # Player と 敵本体の当たり判定
+    if pygame.sprite.spritecollide(player, enemies, False, collided=pygame.sprite.collide_rect):
+        player_life.lose_life()
+        damage_sound.play()
+
+    # Player と Fireball の当たり判定
+    if pygame.sprite.spritecollide(player, enemy_fireballs, True, collided=pygame.sprite.collide_rect):
+        player_life.lose_life()
+        damage_sound.play()
+
+    # ライフが0になったらゲーム終了
+    if player_life.current_lives <= 0:
+        print("ゲームオーバー")
+        running = False
+
 
     screen.blit(timer_text, (650, 10))
 
