@@ -132,8 +132,7 @@ import random
 
 class WanderEnemy(Character):
     def __init__(self):
-        super().__init__('assets//skull.png', (random.randint(100, 700), random.randint(100, 500)), speed=2.0)
-        self.image.fill((255, 0, 0, 100), special_flags=pygame.BLEND_RGBA_MULT)  # 赤みを強調
+        super().__init__('assets//enemy_sake.png', (random.randint(100, 700), random.randint(100, 500)), speed=2.0)
         self.phase = "wander"
         self.wait_counter = 0
         self.move_counter = 0
