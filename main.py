@@ -16,40 +16,79 @@ time_limit = 300
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.original_image = pygame.image.load('assets//calcium.png').convert_alpha()
+        self.original_image = pygame.image.load('assets//robot.png').convert_alpha()
         self.image = self.original_image.copy()
         self.rect = self.image.get_rect()
         self.rect.center = (400, 300)
-        self.speed_x = 0
-        self.speed_y = 0
+        self.pos = pygame.math.Vector2(self.rect.center)
+        self.speed = 1
+        self.angle = 0  # 向いている角度（度）
+        self.direction = pygame.math.Vector2(0, 0)  # 移動方向はキー入力に基づく
+
     def update(self):
         keys = pygame.key.get_pressed()
-        
-        self.speed_x = 0
-        self.speed_y = 0
-        
-        if keys[pygame.K_LEFT]:
-            self.speed_x = -1
-        if keys[pygame.K_RIGHT]:
-            self.speed_x = 1
-        if keys[pygame.K_UP]:
-            self.speed_y = -1
-        if keys[pygame.K_DOWN]:
-            self.speed_y = 1
-            
-        # Update position
-        self.rect.x += self.speed_x
-        self.rect.y += self.speed_y
 
-        # Keep inside window
-        if self.rect.left < 0:
-            self.rect.left = 0
-        if self.rect.right > 800:
-            self.rect.right = 800
-        if self.rect.top < 0:
-            self.rect.top = 0
-        if self.rect.bottom > 600:
-            self.rect.bottom = 600
+        # 回転処理（W/Sキー）
+        if keys[pygame.K_w]:
+            self.angle += ROTATE_SPEED
+        if keys[pygame.K_s]:
+            self.angle -= ROTATE_SPEED
+
+        # 移動処理（矢印キー）
+        self.direction.x = 0
+        self.direction.y = 0
+
+        if keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT]:
+            self.direction.x = -1
+        elif keys[pygame.K_RIGHT] and not keys[pygame.K_LEFT]:
+
+            self.direction.x = 1
+
+        if keys[pygame.K_UP] and not keys[pygame.K_DOWN]:
+            self.direction.y = -1
+        elif keys[pygame.K_DOWN] and not keys[pygame.K_UP]:
+            self.direction.y = 1
+
+        if self.direction.length() != 0:
+            self.direction = self.direction.normalize()
+
+        self.pos += self.direction * self.speed
+        self.rect.center = (round(self.pos.x), round(self.pos.y))
+
+        # 画面内制限
+        #screen_rect = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.rect.clamp_ip(screen_rect)
+        self.pos.x = max(0, min(SCREEN_WIDTH, self.pos.x))
+        self.pos.y = max(0, min(SCREEN_HEIGHT, self.pos.y))
+
+
+        # 回転画像の再描画（angleだけに基づく）
+        self.image = pygame.transform.rotate(self.original_image, self.angle)
+        self.rect = self.image.get_rect(center=self.rect.center)
+
+    def shoot(self):
+        bullet = Bullet(self.rect.center, self.angle)
+        all_sprites.add(bullet)
+        bullets.add(bullet)
+
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, pos, angle):
+        super().__init__()
+        self.image = pygame.Surface((10, 10))
+        self.image.fill((255, 255, 0))
+        self.rect = self.image.get_rect(center=pos)
+        self.pos = pygame.math.Vector2(pos)
+        self.velocity = pygame.math.Vector2(
+            math.cos(math.radians(angle)),
+            -math.sin(math.radians(angle))
+        ) * BULLET_SPEED
+
+    def update(self):
+        self.pos += self.velocity
+        self.rect.center = (round(self.pos.x), round(self.pos.y))
+        if not screen_rect.colliderect(self.rect):
+            self.kill()
+
 
 # Initialize Pygame
 pygame.init()
@@ -87,7 +126,10 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    bg_x -= 1
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                player.shoot()
+
     screen.blit(bg_image, (bg_x, 0))
 
     all_sprites.update()
@@ -96,6 +138,8 @@ while running:
     # Calculate the time elapsed
     elapsed_ms = pygame.time.get_ticks()
     elapsed_sec = elapsed_ms // 1000
+    if elapsed_ms % 100 == 0:
+            bg_x -= 1
     time_ramaining = time_limit - elapsed_sec
     timer_text = font.render(f"Time: {time_ramaining}s", True, (255, 255, 255))
 
