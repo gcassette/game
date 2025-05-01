@@ -125,6 +125,53 @@ class Enemy(Character):
     def is_arrived(self):
         return (self.target_pos - self.pos).length() <= DISTANCE_ARRIVAL_PERMISSION
 
+import random
+
+class WanderEnemy(Character):
+    def __init__(self):
+        super().__init__('assets//skull.png', (random.randint(100, 700), random.randint(100, 500)), speed=2.0)
+        self.image.fill((255, 0, 0, 100), special_flags=pygame.BLEND_RGBA_MULT)  # 赤みを強調
+        self.phase = "wander"
+        self.wait_counter = 0
+        self.move_counter = 0
+        self.max_move_frames = 60
+        self.max_wait_frames = 30
+        self.set_random_direction()
+
+    def set_random_direction(self):
+        directions = [
+            pygame.math.Vector2(1, 0),   # 右
+            pygame.math.Vector2(-1, 0),  # 左
+            pygame.math.Vector2(0, 1),   # 下
+            pygame.math.Vector2(0, -1)   # 上
+        ]
+        self.direction = random.choice(directions) * self.speed
+
+
+    def update(self):
+        if self.phase == "wander":
+            self.move()
+            self.move_counter += 1
+
+            # 画面端に到達したら止まって方向転換準備
+            if not screen_rect.contains(self.rect):
+                self.rect.clamp_ip(screen_rect)
+                self.phase = "wait"
+                self.wait_counter = 0
+                return
+
+            if self.move_counter >= self.max_move_frames:
+                self.phase = "wait"
+                self.wait_counter = 0
+
+        elif self.phase == "wait":
+            self.wait_counter += 1
+            if self.wait_counter >= self.max_wait_frames:
+                self.set_random_direction()
+                self.move_counter = 0
+                self.phase = "wander"
+
+
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, pos, angle):
         super().__init__()
@@ -159,8 +206,10 @@ all_sprites = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 player = Player()
 enemy = Enemy()
+wander_enemy = WanderEnemy()
 all_sprites.add(player)
 all_sprites.add(enemy)
+all_sprites.add(wander_enemy)
 
 clock = pygame.time.Clock()
 running = True
