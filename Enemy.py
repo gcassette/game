@@ -1,6 +1,6 @@
 import pygame
 import math
-from Bullet import Bullet
+from Weapon import Weapon
 
 Enemy_IMG_PATH = "Assets\\skull.png"
 DISTANCE_ARRIVAL_PERMISSION = 5.0
@@ -13,6 +13,7 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.screen = screen
 
+        self.angle = 0
         self.speed = 3.0
         self.vx = 0
         self.vy = 0
@@ -24,6 +25,9 @@ class Enemy(pygame.sprite.Sprite):
 
         self.target_pos = None
         self.rect.center = self.appearancePosition
+
+        #所持武器一覧
+        self.weapon = Weapon(lambda: self.rect.center, self.angle, self.screen)
 
         # 状態変数（entry/attack/exit）
         self.phase = "entry"
@@ -86,9 +90,7 @@ class Enemy(pygame.sprite.Sprite):
         return self.distance <= DISTANCE_ARRIVAL_PERMISSION
 
     def shoot(self, all_sprites, bullets_sprites_group):
-        bullet = Bullet(self.rect.center, self.angle, self.screen)
-        all_sprites.add(bullet)
-        bullets_sprites_group.add(bullet)
+        self.weapon.shoot(all_sprites, bullets_sprites_group)
     
     def draw(self, screen):
         screen.blit(self.image, self.rect)
