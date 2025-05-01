@@ -137,6 +137,8 @@ class WanderEnemy(Character):
         self.max_move_frames = 60
         self.max_wait_frames = 30
         self.set_random_direction()
+        self.fireball_timer = 0
+        self.fireball_interval = 90  # 1.5秒ごと（FPS=60前提）
 
     def set_random_direction(self):
         directions = [
@@ -170,6 +172,14 @@ class WanderEnemy(Character):
                 self.set_random_direction()
                 self.move_counter = 0
                 self.phase = "wander"
+         # 火の玉発射
+        self.fireball_timer += 1
+        if self.fireball_timer >= self.fireball_interval and self.direction.length_squared() > 0:
+            fireball = Fireball(self.rect.center, self.direction)
+            all_sprites.add(fireball)
+            enemy_fireballs.add(fireball)
+            self.fireball_timer = 0
+
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -183,6 +193,21 @@ class Bullet(pygame.sprite.Sprite):
             math.cos(math.radians(angle)),
             -math.sin(math.radians(angle))
         ) * BULLET_SPEED
+
+    def update(self):
+        self.pos += self.velocity
+        self.rect.center = (round(self.pos.x), round(self.pos.y))
+        if not screen_rect.colliderect(self.rect):
+            self.kill()
+
+class Fireball(pygame.sprite.Sprite):
+    def __init__(self, pos, direction):
+        super().__init__()
+        self.image = pygame.Surface((12, 12), pygame.SRCALPHA)
+        pygame.draw.circle(self.image, (255, 100, 0), (6, 6), 6)  # 赤オレンジの火の玉
+        self.rect = self.image.get_rect(center=pos)
+        self.pos = pygame.math.Vector2(pos)
+        self.velocity = direction.normalize() * 5.0
 
     def update(self):
         self.pos += self.velocity
@@ -204,6 +229,7 @@ beam_sound.set_volume(0.05)
 
 all_sprites = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
+enemy_fireballs = pygame.sprite.Group()
 player = Player()
 enemy = Enemy()
 wander_enemy = WanderEnemy()
