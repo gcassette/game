@@ -15,6 +15,7 @@ pygame.display.set_caption("Hello Pygame")
 
 all_sprites = pygame.sprite.Group()
 spriteEneies = pygame.sprite.Group()
+sprites_bullets = pygame.sprite.Group()
 
 player = Player(screen)
 enemy = Enemy(screen)
@@ -30,7 +31,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            player.shoot(all_sprites)
+            player.shoot(all_sprites, sprites_bullets)
 
     all_sprites.update()
     screen.fill((0, 0, 0))

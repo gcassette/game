@@ -85,5 +85,10 @@ class Enemy(pygame.sprite.Sprite):
     def isArrived(self) -> bool:
         return self.distance <= DISTANCE_ARRIVAL_PERMISSION
 
+    def shoot(self, all_sprites, bullets_sprites_group):
+        bullet = Bullet(self.rect.center, self.angle, self.screen)
+        all_sprites.add(bullet)
+        bullets_sprites_group.add(bullet)
+    
     def draw(self, screen):
         screen.blit(self.image, self.rect)

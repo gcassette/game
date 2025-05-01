@@ -61,6 +61,7 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
 
-    def shoot(self, bulletsScriptGroup):
+    def shoot(self, all_sprites, bullets_sprites_group):
         bullet = Bullet(self.rect.center, self.angle, self.screen)
-        bulletsScriptGroup.add(bullet)
+        all_sprites.add(bullet)
+        bullets_sprites_group.add(bullet)
