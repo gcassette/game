@@ -1,13 +1,16 @@
 import pygame
 import math
+from Life import Life
+from Background import Background
 
 # Constants
-SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
+SCREEN_WIDTH, SCREEN_HEIGHT = 800, 585
 BULLET_SPEED = 10
 ROTATE_SPEED = 3
 ENEMY_SPEED = 3.0
 FPS = 60
 DISTANCE_ARRIVAL_PERMISSION = 5.0
+TIME_LIMIT = 300
 
 screen_rect = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
 
@@ -37,7 +40,7 @@ class Character(pygame.sprite.Sprite):
 
 class Player(Character):
     def __init__(self):
-        super().__init__('assets//robot.png', (400, 300), speed=1)
+        super().__init__('assets//calcium.png', (400, 300), speed=1)
         self.angle = 0
     def move(self):
         super().move()  # Characterのmove()を呼び出し
@@ -77,7 +80,7 @@ class Player(Character):
 
 class Enemy(Character):
     def __init__(self):
-        super().__init__('assets//skull.png', (SCREEN_WIDTH + 10, SCREEN_HEIGHT / 2), speed=ENEMY_SPEED)
+        super().__init__('assets//enemy_sake.png', (SCREEN_WIDTH + 10, SCREEN_HEIGHT / 2), speed=ENEMY_SPEED)
         self.attack_pos = pygame.math.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
         self.exit_pos = pygame.math.Vector2(SCREEN_WIDTH / 2, -100)
         self.phase = "entry"
@@ -154,6 +157,8 @@ pygame.mixer.music.play(-1)
 pygame.mixer.music.set_volume(0.05)
 beam_sound = pygame.mixer.Sound("assets/\u30d3\u30fc\u30e0\u97f3.mp3")
 beam_sound.set_volume(0.05)
+player_life = Life(max_lives=5)
+background = Background(SCREEN_WIDTH, SCREEN_WIDTH, scroll_speed=1)
 
 all_sprites = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
@@ -165,9 +170,6 @@ all_sprites.add(enemy)
 clock = pygame.time.Clock()
 running = True
 
-# clock = pygame.time.Clock()
-
-
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -175,7 +177,8 @@ while running:
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
             player.shoot()
 
-    screen.blit(bg_image, (bg_x, 0))
+    background.update()
+    background.draw(screen)
 
     all_sprites.update()
     all_sprites.draw(screen)
@@ -183,9 +186,7 @@ while running:
     # Calculate the time elapsed
     elapsed_ms = pygame.time.get_ticks()
     elapsed_sec = elapsed_ms // 1000
-    if elapsed_ms % 100 == 0:
-            bg_x -= 1
-    time_ramaining = time_limit - elapsed_sec
+    time_ramaining = TIME_LIMIT - elapsed_sec
     timer_text = font.render(f"Time: {time_ramaining}s", True, (255, 255, 255))
 
     screen.blit(timer_text, (650, 10))
