@@ -128,6 +128,63 @@ class Enemy(Character):
     def is_arrived(self):
         return (self.target_pos - self.pos).length() <= DISTANCE_ARRIVAL_PERMISSION
 
+import random
+
+class WanderEnemy(Character):
+    def __init__(self):
+        super().__init__('assets//skull.png', (random.randint(100, 700), random.randint(100, 500)), speed=2.0)
+        self.image.fill((255, 0, 0, 100), special_flags=pygame.BLEND_RGBA_MULT)  # 赤みを強調
+        self.phase = "wander"
+        self.wait_counter = 0
+        self.move_counter = 0
+        self.max_move_frames = 60
+        self.max_wait_frames = 30
+        self.set_random_direction()
+        self.fireball_timer = 0
+        self.fireball_interval = 90  # 1.5秒ごと（FPS=60前提）
+
+    def set_random_direction(self):
+        directions = [
+            pygame.math.Vector2(1, 0),   # 右
+            pygame.math.Vector2(-1, 0),  # 左
+            pygame.math.Vector2(0, 1),   # 下
+            pygame.math.Vector2(0, -1)   # 上
+        ]
+        self.direction = random.choice(directions) * self.speed
+
+
+    def update(self):
+        if self.phase == "wander":
+            self.move()
+            self.move_counter += 1
+
+            # 画面端に到達したら止まって方向転換準備
+            if not screen_rect.contains(self.rect):
+                self.rect.clamp_ip(screen_rect)
+                self.phase = "wait"
+                self.wait_counter = 0
+                return
+
+            if self.move_counter >= self.max_move_frames:
+                self.phase = "wait"
+                self.wait_counter = 0
+
+        elif self.phase == "wait":
+            self.wait_counter += 1
+            if self.wait_counter >= self.max_wait_frames:
+                self.set_random_direction()
+                self.move_counter = 0
+                self.phase = "wander"
+         # 火の玉発射
+        self.fireball_timer += 1
+        if self.fireball_timer >= self.fireball_interval and self.direction.length_squared() > 0:
+            fireball = Fireball(self.rect.center, self.direction)
+            all_sprites.add(fireball)
+            enemy_fireballs.add(fireball)
+            self.fireball_timer = 0
+
+
+
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, pos, angle):
         super().__init__()
@@ -139,6 +196,21 @@ class Bullet(pygame.sprite.Sprite):
             math.cos(math.radians(angle)),
             -math.sin(math.radians(angle))
         ) * BULLET_SPEED
+
+    def update(self):
+        self.pos += self.velocity
+        self.rect.center = (round(self.pos.x), round(self.pos.y))
+        if not screen_rect.colliderect(self.rect):
+            self.kill()
+
+class Fireball(pygame.sprite.Sprite):
+    def __init__(self, pos, direction):
+        super().__init__()
+        self.image = pygame.Surface((12, 12), pygame.SRCALPHA)
+        pygame.draw.circle(self.image, (255, 100, 0), (6, 6), 6)  # 赤オレンジの火の玉
+        self.rect = self.image.get_rect(center=pos)
+        self.pos = pygame.math.Vector2(pos)
+        self.velocity = direction.normalize() * 5.0
 
     def update(self):
         self.pos += self.velocity
@@ -162,10 +234,13 @@ background = Background(SCREEN_WIDTH, SCREEN_WIDTH, scroll_speed=1)
 
 all_sprites = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
+enemy_fireballs = pygame.sprite.Group()
 player = Player()
 enemy = Enemy()
+wander_enemy = WanderEnemy()
 all_sprites.add(player)
 all_sprites.add(enemy)
+all_sprites.add(wander_enemy)
 
 clock = pygame.time.Clock()
 running = True
