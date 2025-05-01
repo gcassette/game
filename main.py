@@ -16,26 +16,36 @@ class Character(pygame.sprite.Sprite):
         super().__init__()
         self.original_image = pygame.image.load(image_path).convert_alpha()
         self.image = self.original_image.copy()
+        #characterのscreen上の位置をrectで管理する、
         self.rect = self.image.get_rect(center=start_pos)
+        #characterの本当の位置をposで管理する、
         self.pos = pygame.math.Vector2(self.rect.center)
+        #directionは移動方向を表すベクトル、speedは移動速度を表す。characterの移動距離はspeed * directionで決まる。
         self.speed = speed
         self.direction = pygame.math.Vector2(0, 0)
 
+
     def move(self):
+        #directionは移動方向を表すベクトルのため正規化を行い、長さを1にする。
         if self.direction.length_squared() > 0:
             self.direction = self.direction.normalize()
         else:
             self.direction.update(0, 0)
         self.pos += self.direction * self.speed
         self.rect.center = (round(self.pos.x), round(self.pos.y))
-        self.rect.clamp_ip(screen_rect)
-        self.pos.x = max(0, min(SCREEN_WIDTH, self.pos.x))
-        self.pos.y = max(0, min(SCREEN_HEIGHT, self.pos.y))
+        
 
 class Player(Character):
     def __init__(self):
         super().__init__('assets//robot.png', (400, 300), speed=1)
         self.angle = 0
+    def move(self):
+        super().move()  # Characterのmove()を呼び出し
+
+        # 画面内に制限する処理だけを追加
+        self.rect.clamp_ip(screen_rect)
+        self.pos.x = max(0, min(SCREEN_WIDTH, self.pos.x))
+        self.pos.y = max(0, min(SCREEN_HEIGHT, self.pos.y))
 
     def update(self):
         keys = pygame.key.get_pressed()
