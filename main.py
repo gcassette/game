@@ -118,9 +118,8 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                player.shoot()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            player.shoot()
 
     screen.blit(bg_image, (bg_x, 0))
 
@@ -138,11 +137,8 @@ while running:
     screen.blit(timer_text, (650, 10))
 
     player_life.draw(screen)
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            player.shoot()
 
     all_sprites.update()
-    screen.fill((0, 0, 0))
     all_sprites.draw(screen)
 
     #direction_text = font.render(f"Angle: {player.angle:.2f}", True, (255, 255, 0))
