@@ -1,18 +1,12 @@
 import pygame
 import math
-from Enemy import Enemy
-from Life import Life
 
 # Constants
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
 BULLET_SPEED = 10
 ROTATE_SPEED = 3  # 回転速度（度単位）
 screen_rect = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
-time_limit = 300
 
-# Define our square object and call super to
-# give it all the properties and methods of pygame.sprite.Sprite
-# Define the class for our square objects
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -41,7 +35,6 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT]:
             self.direction.x = -1
         elif keys[pygame.K_RIGHT] and not keys[pygame.K_LEFT]:
-
             self.direction.x = 1
 
         if keys[pygame.K_UP] and not keys[pygame.K_DOWN]:
@@ -61,7 +54,6 @@ class Player(pygame.sprite.Sprite):
         self.pos.x = max(0, min(SCREEN_WIDTH, self.pos.x))
         self.pos.y = max(0, min(SCREEN_HEIGHT, self.pos.y))
 
-
         # 回転画像の再描画（angleだけに基づく）
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
@@ -70,6 +62,7 @@ class Player(pygame.sprite.Sprite):
         bullet = Bullet(self.rect.center, self.angle)
         all_sprites.add(bullet)
         bullets.add(bullet)
+        beam_sound.play()
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, pos, angle):
@@ -88,35 +81,34 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.center = (round(self.pos.x), round(self.pos.y))
         if not screen_rect.colliderect(self.rect):
             self.kill()
-
-
-# Initialize Pygame
+# Initialization
 pygame.init()
-
-# Set up the game window
-screen = pygame.display.set_mode((800, 600))
+font = pygame.font.SysFont(None, 36)
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Hello Pygame")
 
-# Create Life instance
-player_life = Life(heart_image_path="assets//heart.png", max_lives=5, position=(10, 10))
-player_life.lose_life()
+## BGMの設定
+# サウンドミキサーを初期化
+pygame.mixer.init()
+
+# 音楽ファイルを読み込み
+pygame.mixer.music.load("assets\土星ダンス.mp3")
+# 音楽をループ再生（-1は無限ループ）
+pygame.mixer.music.play(-1)
+# 音量を0.5に設定（0.0〜1.0の範囲）
+pygame.mixer.music.set_volume(0.05)
+
+beam_sound = pygame.mixer.Sound("assets/ビーム音.mp3")
+beam_sound.set_volume(0.05)  # お好みで音量調整
+
+
 all_sprites = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
-spriteEneies = pygame.sprite.Group()
-font = pygame.font.SysFont(None, 36)  # Default font, size 36
-# load background
-bg_image = pygame.image.load("assets//bg1.png").convert()
-
-
 
 player = Player()
-enemy = Enemy(screen)
 all_sprites.add(player)
-spriteEneies.add(enemy)
-all_sprites.add(spriteEneies)
-bg_x = 0
 
-# Game loop
+clock = pygame.time.Clock()
 running = True
 
 # clock = pygame.time.Clock()
@@ -146,8 +138,17 @@ while running:
     screen.blit(timer_text, (650, 10))
 
     player_life.draw(screen)
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            player.shoot()
+
+    all_sprites.update()
+    screen.fill((0, 0, 0))
+    all_sprites.draw(screen)
+
+    #direction_text = font.render(f"Angle: {player.angle:.2f}", True, (255, 255, 0))
+    #screen.blit(direction_text, (10, 30))
 
     pygame.display.flip()
+    clock.tick(60)
 
-# Quit Pygame
 pygame.quit()
