@@ -1,5 +1,5 @@
 import pygame
-from Bullet import Bullet
+from Weapon import Weapon
 
 
 Player_IMG_PATH = 'assets//robot.png'
@@ -20,6 +20,7 @@ class Player(pygame.sprite.Sprite):
         self.angle = 0  # 向いている角度（度）
 
         self.screen = screen
+        self.weapon = Weapon(lambda: self.rect.center, self.angle, self.screen)
         self.direction = pygame.math.Vector2(0, 0)  # 移動方向はキー入力に基づく
 
     def update(self):
@@ -62,6 +63,4 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=self.rect.center)
 
     def shoot(self, all_sprites, bullets_sprites_group):
-        bullet = Bullet(self.rect.center, self.angle, self.screen)
-        all_sprites.add(bullet)
-        bullets_sprites_group.add(bullet)
+        self.weapon.shoot(all_sprites, bullets_sprites_group)
