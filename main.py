@@ -15,7 +15,7 @@ TIME_LIMIT = 300
 screen_rect = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
 
 class Character(pygame.sprite.Sprite):
-    def __init__(self, image_path, start_pos, speed=1):
+    def __init__(self, image_path, start_pos, speed=1, max_hp=1):
         super().__init__()
         self.original_image = pygame.image.load(image_path).convert_alpha()
         self.image = self.original_image.copy()
@@ -27,6 +27,8 @@ class Character(pygame.sprite.Sprite):
         self.speed = speed
         self.direction = pygame.math.Vector2(0, 0)
 
+        self.max_hp = max_hp
+        self.hp = max_hp
 
     def move(self):
         #directionは移動方向を表すベクトルのため正規化を行い、長さを1にする。
@@ -36,11 +38,15 @@ class Character(pygame.sprite.Sprite):
             self.direction.update(0, 0)
         self.pos += self.direction * self.speed
         self.rect.center = (round(self.pos.x), round(self.pos.y))
+    def take_damage(self, damage=1):
+        self.hp -= damage
+        if self.hp <= 0:
+            self.kill()
         
 
 class Player(Character):
     def __init__(self):
-        super().__init__('assets//calcium.png', (400, 300), speed=1)
+        super().__init__('assets//calcium.png', (400, 300), speed=1, max_hp=5)
         self.angle = 0
     def move(self):
         super().move()  # Characterのmove()を呼び出し
@@ -136,7 +142,7 @@ import random
 
 class WanderEnemy(Character):
     def __init__(self):
-        super().__init__('assets//enemy_sake.png', (random.randint(100, 700), random.randint(100, 500)), speed=2.0)
+        super().__init__('assets//enemy_sake.png', (random.randint(100, 700), random.randint(100, 500)), speed=2.0, max_hp=2)
         self.phase = "wander"
         self.wait_counter = 0
         self.move_counter = 0
@@ -188,7 +194,7 @@ class WanderEnemy(Character):
         else:
             self.image = self.original_image.copy()
             self.facing_left = True
-            
+
         self.fireball_timer += 1
         if self.fireball_timer >= self.fireball_interval:
             direction = pygame.math.Vector2(-1, 0) if self.facing_left else pygame.math.Vector2(1, 0)
@@ -295,6 +301,14 @@ while running:
     if pygame.sprite.spritecollide(player, enemy_fireballs, True, collided=pygame.sprite.collide_rect):
         player_life.lose_life()
         damage_sound.play()
+
+    # WanderEnemy と bullets の当たり判定
+    # wander_enemy と bullets の当たり判定
+    if pygame.sprite.spritecollide(wander_enemy, bullets, True, collided=pygame.sprite.collide_rect):
+        wander_enemy.take_damage()
+
+        if wander_enemy.hp <= 0:
+            wander_enemy.kill()
 
     # ライフが0になったらゲーム終了
     if player_life.current_lives <= 0:
