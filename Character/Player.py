@@ -3,7 +3,7 @@ from Character.Character import Character
 import Weapon.ProjectileType as ProjectileType
 
 
-Player_IMG_PATH = 'assets//robot.png'
+Player_IMG_PATH = 'assets//calcium.png'
 POSITION_START = (400, 300)
 ANGLE_PLAYER = 0
 SPEED_PLAYER = 1

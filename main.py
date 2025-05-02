@@ -7,7 +7,7 @@ from Background import Background
 import SpriteGroups.EnemyProjectile
 
 
-SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
+SCREEN_WIDTH, SCREEN_HEIGHT = 800, 585
 screen_rect = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT) 
 TIME_LIMIT = 300
 
@@ -53,7 +53,8 @@ while running:
             player.shoot()
 
     all_sprites.update()
-    screen.fill((0, 0, 0))
+    background.update()
+    background.draw(screen)
     all_sprites.draw(screen)
 
     #direction_text = font.render(f"Angle: {player.angle:.2f}", True, (255, 255, 0))
