@@ -1,7 +1,6 @@
 import pygame
 from abc import ABC, abstractmethod
-import CommonSystem
-import Weapon
+from Weapon import Weapon
 
 class Character(pygame.sprite.Sprite, ABC):
     def __init__(self, image_path, start_pos, sprite_manager, speed=1, max_hp=1):
@@ -14,13 +13,13 @@ class Character(pygame.sprite.Sprite, ABC):
         self.pos = pygame.math.Vector2(self.rect.center)
         #directionは移動方向を表すベクトル、speedは移動速度を表す。characterの移動距離はspeed * directionで決まる。
         self.speed = speed
-        self.direction = CommonSystem.DirectionUnit(1, 0)
+        self.direction = pygame.math.Vector2(0, 0)
 
         self.max_hp = max_hp
         self.hp = max_hp
 
         #武器の装備
-        self.weapon = Weapon.Weapon(sprite_manager)
+        self.weapon = Weapon(sprite_manager)
         self.set_bullets()
 
     @abstractmethod

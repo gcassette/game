@@ -8,7 +8,7 @@ import SpriteGroups.EnemyProjectile
 
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
-screen_rect = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+screen_rect = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT) 
 TIME_LIMIT = 300
 
 # Initialization
@@ -50,7 +50,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            player.shoot(all_sprites)
+            player.shoot()
 
     all_sprites.update()
     screen.fill((0, 0, 0))

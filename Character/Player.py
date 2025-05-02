@@ -116,5 +116,5 @@ class Player(Character):
         self.weapon.shoot()
 
     def set_bullets(self):
-        bullet_type = ProjectileType.BulletLinerly(lambda: self.rect.center, lambda: self.angle, self.screen)
+        bullet_type = ProjectileType.BulletLinerly(lambda: self.rect.center, lambda: self.direction, self.screen)
         self.weapon.resister_bullet(bullet_type)

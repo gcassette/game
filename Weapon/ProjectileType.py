@@ -10,7 +10,7 @@ NAME_PROJECTILE_FIRE = "FireBall"
 
 #投射物の抽象クラス
 class Projectile(ABC, pygame.sprite.Sprite):
-    def __init__(self, _name, get_position_func, get_angle_func, screen):
+    def __init__(self, _name, get_position_func, get_direction_func, screen):
         super().__init__()
         self._name = _name
         self.screen = screen
@@ -18,7 +18,7 @@ class Projectile(ABC, pygame.sprite.Sprite):
 
         #このクラスを保持しているcharacterの pos/angle 参照関数
         self.get_position = get_position_func
-        self.get_angle = get_angle_func
+        self.get_direction = get_direction_func
         
         self.enable: bool = False
     
@@ -43,9 +43,9 @@ class Projectile(ABC, pygame.sprite.Sprite):
     #自身を描画、運動を与える
     def shoot(self):
         self.enable = True
-        #position, angle を取得・固定
+        #position, direction を取得・固定
         self.pos = self.get_position()
-        self.angle = self.get_angle()
+        self.direction = self.get_direction()
 
         #self.pos = pygame.math.Vector2(pos)
         self.image = self.create_image()
@@ -54,6 +54,8 @@ class Projectile(ABC, pygame.sprite.Sprite):
 
     def update(self):
         if(not self.enable): return
+        print(self.pos)
+        print(self.velocity)
         self.pos += self.velocity
         self.velocity = self.get_next_velocity()
         self.rect.center = (round(self.pos.x), round(self.pos.y))
@@ -81,11 +83,7 @@ class BulletLinerly(Projectile):
 
     def get_init_velocity(self):
         super().get_init_velocity()
-        print(self.angle)
-        return pygame.math.Vector2(
-            math.cos(math.radians(self.angle)),
-            -math.sin(math.radians(self.angle))
-        ) * self.SPEED
+        return self.direction * self.SPEED
     
     def get_next_velocity(self) -> pygame.math.Vector2:
         super().get_next_velocity()
@@ -93,7 +91,7 @@ class BulletLinerly(Projectile):
         return self.velocity
     
     def clone(self):
-        return BulletLinerly(self.get_position, self.get_angle, self.screen)
+        return BulletLinerly(self.get_position, self.get_direction, self.screen)
 
     def shoot(self):
         self.beam_sound.play()
@@ -127,8 +125,7 @@ class Fireball(Projectile):
 
     def get_init_velocity(self):
         super().get_init_velocity()
-         #注意！！基底クラスの関係で direction -> angle に名前が変わる
-        self.velocity = self.angle.normalize() * self.SPEED
+        return self.velocity * self.SPEED
 
     def get_next_velocity(self) -> pygame.math.Vector2:
         super().get_next_velocity()
