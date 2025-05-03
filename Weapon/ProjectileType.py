@@ -10,7 +10,7 @@ NAME_PROJECTILE_FIRE = "FireBall"
 
 #投射物の抽象クラス
 class Projectile(ABC, pygame.sprite.Sprite):
-    def __init__(self, _name, get_position_func, get_direction_func, screen):
+    def __init__(self, _name, get_position_func, shoot_direction, screen):
         super().__init__()
         self._name = _name
         self.screen = screen
@@ -18,62 +18,57 @@ class Projectile(ABC, pygame.sprite.Sprite):
 
         #このクラスを保持しているcharacterの pos/angle 参照関数
         self.get_position = get_position_func
-        self.get_direction = get_direction_func
+        self.shoot_direction = shoot_direction
         
         self.enable: bool = False
+
+        self.beam_sound = pygame.mixer.Sound(SE_BULLET_LINER)
+        self.beam_sound.set_volume(SE_VOLUME)
+        self.SPEED = 10
     
     #表示画像を生成する
     @abstractmethod
     def create_image(self) -> pygame.Surface:
         pass
 
-    #弾の初速 velocity
-    @abstractmethod
     def get_init_velocity(self) -> pygame.math.Vector2:
-        pass
-    #弾の次フレームの移動ベクトルを計算
-    @abstractmethod
-    def get_next_velocity(self) -> pygame.math.Vector2:
-        pass
+        return self.shoot_direction() * self.SPEED
+
+
 
     @abstractmethod
     def clone(self) -> pygame.Surface:
         pass
 
     #自身を描画、運動を与える
-    def shoot(self):
+    def drawing_shoot(self):
         self.enable = True
         #position, direction を取得・固定
         self.pos = self.get_position()
-        self.direction = self.get_direction()
 
         #self.pos = pygame.math.Vector2(pos)
         self.image = self.create_image()
         self.rect = self.image.get_rect(center=self.pos)
         self.velocity = self.get_init_velocity()
+        self.beam_sound.play()
 
     def update(self):
         if(not self.enable): return
         print(self.pos)
         print(self.velocity)
         self.pos += self.velocity
-        self.velocity = self.get_next_velocity()
         self.rect.center = (round(self.pos.x), round(self.pos.y))
 
         if not self.screen.get_rect().colliderect(self.rect):
             self.kill()
 
 class BulletLinerly(Projectile):
-    SPEED = 10
     SIZE = (10,10)
     COLOR = (255, 255, 0)
 
     def __init__(self, get_position_func, get_angle_func, screen):
         super().__init__(NAME_PROJECTILE_LINER, get_position_func, get_angle_func, screen)
-        self.screen = screen
-
-        self.beam_sound = pygame.mixer.Sound(SE_BULLET_LINER)
-        self.beam_sound.set_volume(SE_VOLUME)
+        self.SPEED = 10
 
     def create_image(self) -> pygame.Surface:
         super().create_image()
@@ -81,27 +76,14 @@ class BulletLinerly(Projectile):
         image.fill(self.COLOR)
         return image
 
-    def get_init_velocity(self):
-        super().get_init_velocity()
-        return self.direction * self.SPEED
-    
-    def get_next_velocity(self) -> pygame.math.Vector2:
-        super().get_next_velocity()
-        #等速直線運動のため変更なし
-        return self.velocity
     
     def clone(self):
-        return BulletLinerly(self.get_position, self.get_direction, self.screen)
+        return BulletLinerly(self.get_position, self.shoot_direction, self.screen)
 
-    def shoot(self):
-        self.beam_sound.play()
-        super().shoot()
 
-    def update(self):
-        super().update()
+
 
 class Fireball(Projectile):
-    SPEED = 5
     SIZE = (12, 12)
     COLOR = (255, 100, 0)
 
@@ -110,10 +92,10 @@ class Fireball(Projectile):
     #beam_sound = pygame.mixer.Sound(SE_BULLET_LINER)
     #beam_sound.set_volume(SE_VOLUME)
 
-    def __init__(self, get_position_func, get_direction_func, screen):
-        #
-        super().__init__(NAME_PROJECTILE_FIRE, get_position_func, get_direction_func, screen)
-        self.screen = screen
+    def __init__(self, get_position_func, shoot_direction, screen):
+        super().__init__(NAME_PROJECTILE_FIRE, get_position_func, shoot_direction, screen)
+
+        self.SPEED = 5
 
     def create_image(self) -> pygame.Surface:
         super().create_image()
@@ -122,22 +104,7 @@ class Fireball(Projectile):
         pygame.draw.circle(image, self.COLOR, self.SPRITE_COORDINATE, self.SPRITE_RADIUS)  # 赤オレンジの火の玉
         
         return image
-
-    def get_init_velocity(self):
-        super().get_init_velocity()
-        return self.velocity * self.SPEED
-
-    def get_next_velocity(self) -> pygame.math.Vector2:
-        super().get_next_velocity()
-        #等速直線運動のため変更なし
-        return self.velocity
     
-    def clone(self) -> pygame.Surface:
-        return Fireball(self.get_position, self.get_angle, self.screen)
+    def clone(self) -> Projectile:
+        return Fireball(self.get_position, self.shoot_direction, self.screen)
 
-    def shoot(self):
-        self.beam_sound.play()
-        super().shoot()
-
-    def update(self):
-        super().update()
