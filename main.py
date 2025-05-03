@@ -14,7 +14,7 @@ TIME_LIMIT = 300
 # Initialization
 pygame.init()
 font = pygame.font.SysFont(None, 36)
-japanese_font = pygame.font.Font('assets\\ipaexg.ttf', 36)
+japanese_font = pygame.font.Font('assets/BestTen-DOT.otf', 50)
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("カルシウム王子の冒険")
 pygame.mixer.init()
@@ -23,10 +23,10 @@ pygame.mixer.music.play(-1)
 pygame.mixer.music.set_volume(0.02)
 damage_sound = pygame.mixer.Sound("assets/レトロアクション_3.mp3")
 damage_sound.set_volume(0.05)
-
 clock = pygame.time.Clock()
+
 running = True
-state = 'title'
+state = 'title_init'
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -51,7 +51,7 @@ while running:
         # Calculate the time elapsed
         elapsed_ms = pygame.time.get_ticks()
         elapsed_sec = elapsed_ms // 1000
-        time_ramaining = TIME_LIMIT - elapsed_sec
+        time_ramaining = TIME_LIMIT - elapsed_sec + level_start_time
         timer_text = font.render(f"Time: {time_ramaining}s", True, (255, 255, 255))
         # --- 衝突判定 ---
 
@@ -76,7 +76,7 @@ while running:
         # ライフが0になったらゲーム終了
         if player_life.current_lives <= 0:
             print("ゲームオーバー")
-            state = 'title'
+            state = 'title_init'
 
 
         screen.blit(timer_text, (650, 10))
@@ -87,13 +87,24 @@ while running:
         all_sprites.draw(screen)
 
     elif state == 'title':      # display title
-        screen.fill((0, 0, 0))
-        title_text = japanese_font.render("カルシウム王子の冒険", True, (255, 255, 255))
-        prompt_text = font.render("Press SPACE to Start", True, (200, 200, 200))
-        screen.blit(title_text, title_text.get_rect(center=(400, 150)))
-        screen.blit(prompt_text, prompt_text.get_rect(center=(400, 250)))
+        screen.blit(bg_title, (0,0))    # background image
+        title_text = japanese_font.render("カルシウム王子の冒険", True, (0, 0, 0))
+        # prompt_text = font.render("Press SPACE to Start", True, (0, 0, 0))
+        screen.blit(title_text, title_text.get_rect(center=(400, 50)))
+        # screen.blit(prompt_text, prompt_text.get_rect(center=(400, 350)))
 
-    elif state == 'level_init': # initialize the game screen
+        if (pygame.time.get_ticks() % 1000 - 500) < 0: #display image in turn every .5 sec
+            screen.blit(calcium_1,(300,70))
+        else:
+            screen.blit(calcium_2,(300,70))
+
+    elif state == 'title_init': # initialize title screen
+        bg_title = pygame.image.load('assets/bg_title.png').convert()
+        calcium_1 = pygame.image.load("assets/calcium_title_1.png").convert_alpha()
+        calcium_2 = pygame.image.load("assets/calcium_title_2.png").convert_alpha()
+        state = 'title'
+
+    elif state == 'level_init': # initialize game screen
         player_life = Life(max_lives=5)
         background = Background(SCREEN_WIDTH, SCREEN_WIDTH, scroll_speed=1)
 
@@ -114,6 +125,9 @@ while running:
         all_sprites.add(wander_enemy)
 
         all_sprites.add(sprite_enemies)
+
+        level_start_time = pygame.time.get_ticks() // 1000  #define the level time started
+
         state = 'playing'
 
     pygame.display.flip()
