@@ -16,6 +16,8 @@ pygame.init()
 font = pygame.font.SysFont(None, 36)
 japanese_font = pygame.font.Font('assets/BestTen-DOT.otf', 50)
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+icon = pygame.image.load("assets/calcium_icon.png").convert_alpha()
+pygame.display.set_icon(icon)
 pygame.display.set_caption("カルシウム王子の冒険")
 pygame.mixer.init()
 pygame.mixer.music.load("assets/\u571f\u661f\u30c0\u30f3\u30b9.mp3")
@@ -102,6 +104,7 @@ while running:
         bg_title = pygame.image.load('assets/bg_title.png').convert()
         calcium_1 = pygame.image.load("assets/calcium_title_1.png").convert_alpha()
         calcium_2 = pygame.image.load("assets/calcium_title_2.png").convert_alpha()
+        title_logo = pygame.image.load("assets/calcium_title_1.png").convert_alpha()
         state = 'title'
 
     elif state == 'level_init': # initialize game screen
