@@ -1,20 +1,19 @@
 import pygame
 from Character.Character import Character
 import Weapon.ProjectileType as ProjectileType
+import math
 
 
 Player_IMG_PATH = 'assets//calcium.png'
 POSITION_START = (400, 300)
-ANGLE_PLAYER = 0
 SPEED_PLAYER = 1
 MAXHP_PLAYER = 5
-
 ROTATE_SPEED = 3  # 回転速度（度単位）
 
 
 class Player(Character):
     def __init__(self, screen, sprite_manager):
-        self.angle = ANGLE_PLAYER
+        self.angle = 0
         self.screen = screen
 
         super().__init__(Player_IMG_PATH, POSITION_START, sprite_manager, SPEED_PLAYER, MAXHP_PLAYER)
@@ -57,6 +56,15 @@ class Player(Character):
     def shoot(self):
         self.weapon.shoot()
 
+    @property
+    def shoot_direction(self):
+        angle_rad = math.radians(self.angle)
+        return pygame.math.Vector2(math.cos(angle_rad), math.sin(angle_rad))
+
     def set_bullets(self):
-        bullet_type = ProjectileType.BulletLinerly(lambda: self.rect.center, lambda: self.direction, self.screen)
+        bullet_type = ProjectileType.BulletLinerly(
+            lambda: self.rect.center,
+            lambda: self.shoot_direction,
+            self.screen
+        )
         self.weapon.resister_bullet(bullet_type)
