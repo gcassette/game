@@ -10,7 +10,7 @@ NAME_PROJECTILE_FIRE = "FireBall"
 
 #投射物の抽象クラス
 class Projectile(ABC, pygame.sprite.Sprite):
-    def __init__(self, _name, get_position_func, shoot_direction, screen):
+    def __init__(self, _name, get_position_func, shoot_direction,screen):
         super().__init__()
         self._name = _name
         self.screen = screen
@@ -32,6 +32,7 @@ class Projectile(ABC, pygame.sprite.Sprite):
         pass
 
     def get_init_velocity(self) -> pygame.math.Vector2:
+        print("shoot_direction2", self.shoot_direction())
         return self.shoot_direction() * self.SPEED
 
 
@@ -66,8 +67,8 @@ class BulletLinerly(Projectile):
     SIZE = (10,10)
     COLOR = (255, 255, 0)
 
-    def __init__(self, get_position_func, get_angle_func, screen):
-        super().__init__(NAME_PROJECTILE_LINER, get_position_func, get_angle_func, screen)
+    def __init__(self, get_position_func, shoot_direction, screen):
+        super().__init__(NAME_PROJECTILE_LINER, get_position_func, shoot_direction, screen)
         self.SPEED = 10
 
     def create_image(self) -> pygame.Surface:
@@ -102,6 +103,7 @@ class Fireball(Projectile):
         image = pygame.Surface(self.SIZE, pygame.SRCALPHA)
         image.fill(self.COLOR)
         pygame.draw.circle(image, self.COLOR, self.SPRITE_COORDINATE, self.SPRITE_RADIUS)  # 赤オレンジの火の玉
+        
         
         return image
     

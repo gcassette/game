@@ -15,10 +15,10 @@ class WanderEnemy(Character):
         self.move_counter = 0
         self.max_move_frames = 60
         self.max_wait_frames = 30
-        self.set_random_direction()
+        self.direction = pygame.math.Vector2(1, 0)
         self.fireball_timer = 0
         self.fireball_interval = 90  # 1.5秒ごと（FPS=60前提）
-        self.facing_left = True  # 左右反転状態を記録する変数
+        self.facing_left = False  # 左右反転状態を記録する変数
 
     def set_random_direction(self):
         directions = [
@@ -27,11 +27,21 @@ class WanderEnemy(Character):
             pygame.math.Vector2(0, 1),   # 下
             pygame.math.Vector2(0, -1)   # 上
         ]
+
         self.direction = random.choice(directions) * self.speed
 
+        # 左右反転状態を記録
+        if self.direction.x < 0:
+            self.image = pygame.transform.flip(self.original_image, True, False)
+            self.facing_left = True
+        elif self.direction.x > 0:
+            self.image = self.original_image.copy()
+            self.facing_left = False
+        # 上下（x == 0）の場合は向きそのまま
+        self.rect = self.image.get_rect(center=self.rect.center)
+
     def set_bullets(self):
-        bullet_type = ProjectileType.BulletLinerly(lambda: self.rect.center, lambda: self.direction, self.screen)
-        self.weapon.resister_bullet(bullet_type)
+        pass
 
 
     def update(self):
@@ -60,16 +70,19 @@ class WanderEnemy(Character):
          # 火の玉発射
 
          # 左右反転状態を記録
-        if self.direction.x < 0:
-            self.image = pygame.transform.flip(self.original_image, True, False)
-            self.facing_left = False
-        else:
-            self.image = self.original_image.copy()
-            self.facing_left = True
+        # if self.direction.x < 0:
+        #     self.image = pygame.transform.flip(self.original_image, True, False)
+        #     self.facing_left = False
+        # else:
+        #     self.image = self.original_image.copy()
+        #     self.facing_left = True
+        # self.rect = self.image.get_rect(center=self.rect.center)
 
         self.fireball_timer += 1
         if self.fireball_timer >= self.fireball_interval:
-            direction = pygame.math.Vector2(-1, 0) if self.facing_left else pygame.math.Vector2(1, 0)
-            fireball = ProjectileType.Fireball(lambda: self.rect.center, lambda: direction, self.screen)
+            #shoot_direction = pygame.math.Vector2(-1, 0) if self.facing_left else pygame.math.Vector2(1, 0)
+            #print("shoot_direction:", shoot_direction)
+            fireball = ProjectileType.Fireball(lambda: self.rect.center, lambda: pygame.math.Vector2(1, 0) if self.facing_left else pygame.math.Vector2(-1, 0),self.screen)
+            self.weapon.resister_bullet(fireball)
             self.weapon.shoot()
             self.fireball_timer = 0
