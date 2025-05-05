@@ -46,7 +46,6 @@ class ChaseEnemy(Character):
 
         # 移動処理
         self.move()
-        print(f"chasenemy speed: {self.speed}")
         #座標を出力
         #print(f"ChaseEnemy Position: {self.pos.x}, {self.pos.y}")
         #playerとの距離を出力

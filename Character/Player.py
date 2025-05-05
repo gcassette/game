@@ -33,8 +33,7 @@ class Player(Character):
     def update(self):
 
         # 無敵状態タイマーのカウントダウン
-        #無敵常態か否かを出力
-        print(f"Invincible: {self.invincible}")
+
         if self.invincible:
             self.invincible_timer -= 1
             if self.invincible_timer <= 0:

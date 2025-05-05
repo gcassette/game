@@ -60,13 +60,8 @@ class Projectile(ABC, pygame.sprite.Sprite):
         self.pos += self.velocity
         self.rect.center = (round(self.pos.x), round(self.pos.y))
 
-        #fireballの場合、座標を出力
-        if self._name == NAME_PROJECTILE_FIRE:
-            print(f"Fireball Position: {self.pos[0]}, {self.pos[1]}")
-
         if not self.screen.get_rect().colliderect(self.rect):
-            #座標を出力
-            print(f"Projectile Position: {self.pos[0]}, {self.pos[1]}")
+
             self.kill()
 
 class BulletLinerly(Projectile):
@@ -109,8 +104,7 @@ class Fireball(Projectile):
         image = pygame.Surface(self.SIZE, pygame.SRCALPHA)
         image.fill(self.COLOR)
         pygame.draw.circle(image, self.COLOR, self.SPRITE_COORDINATE, self.SPRITE_RADIUS)  # 赤オレンジの火の玉
-        #fireballの座標を出力
-        print(f"Fireball Position: {self.pos[0]}, {self.pos[1]}")
+
 
         
         

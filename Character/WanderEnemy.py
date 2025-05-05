@@ -71,15 +71,6 @@ class WanderEnemy(Character):
                 self.phase = "wander"
          # 火の玉発射
 
-         # 左右反転状態を記録
-        # if self.direction.x < 0:
-        #     self.image = pygame.transform.flip(self.original_image, True, False)
-        #     self.facing_left = False
-        # else:
-        #     self.image = self.original_image.copy()
-        #     self.facing_left = True
-        # self.rect = self.image.get_rect(center=self.rect.center)
-
         self.fireball_timer += 1
         if self.fireball_timer >= self.fireball_interval:
             #shoot_direction = pygame.math.Vector2(-1, 0) if self.facing_left else pygame.math.Vector2(1, 0)
