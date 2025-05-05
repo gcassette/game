@@ -25,6 +25,8 @@ pygame.mixer.init()
 pygame.mixer.music.load("assets/\u571f\u661f\u30c0\u30f3\u30b9.mp3")
 pygame.mixer.music.play(-1)
 pygame.mixer.music.set_volume(0.02)
+damage_sound = pygame.mixer.Sound("assets/レトロアクション_3.mp3")
+damage_sound.set_volume(0.05)
 enemy_damage_sound = pygame.mixer.Sound("assets/ショット命中.mp3")
 enemy_damage_sound.set_volume(0.05)
 
@@ -41,7 +43,7 @@ while running:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 player.shoot()
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                state = 'pause'
+                state = 'pause_init'
         elif state == 'pause':
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 state = 'playing'
@@ -241,11 +243,11 @@ while running:
         bullets = pygame.sprite.Group()
         enemy_projectiles = pygame.sprite.Group()
 
-        player = Player(screen, all_sprites)
+        player = Player(screen, all_sprites, bullets)
         #enemy = Enemy(screen, all_sprites, enemy_projectiles)
         wander_enemy = WanderEnemy(screen, all_sprites, enemy_projectiles)
         chase_enemy = ChaseEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos, update_interval=120)
-        LinearEnemy = LinearEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos)
+        linear_enemy = LinearEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos)
         # 敵のグループを作成
         enemies = pygame.sprite.Group()
 
@@ -255,9 +257,9 @@ while running:
         #all_sprites.add(enemy)
         all_sprites.add(wander_enemy)
         all_sprites.add(chase_enemy)
-        all_sprites.add(LinearEnemy)
+        all_sprites.add(linear_enemy)
         enemies.add(wander_enemy, chase_enemy)  # ← ここ追加
-        enemies.add(LinearEnemy)  # ← ここ追加
+        enemies.add(linear_enemy)  # ← ここ追加
 
         all_sprites.add(sprite_enemies)
         all_sprites.add(bullets)
@@ -270,9 +272,24 @@ while running:
 
         state = 'playing'
 
-    elif state == 'pause':
+    elif state == 'pause_init':
         paused = pygame.image.load('assets/paused.png').convert()
+        title_button = pygame.image.load('assets/title_button.png').convert()
+        title_button_hover = pygame.image.load('assets/title_button_hover.png').convert()
+        title_button_rect = play_button.get_rect(center=(402, 530))
+        state = 'pause'
+
+    elif state == 'pause':
         screen.blit(paused, (0,0))
+        # play button
+        mouse_pos = pygame.mouse.get_pos()
+        mouse_click = pygame.mouse.get_pressed()
+        if title_button_rect.collidepoint(mouse_pos):
+            screen.blit(title_button_hover, title_button_rect)
+            if mouse_click[0]:  # Left-click
+                state = 'title_init'
+        else:
+            screen.blit(title_button, title_button_rect)
 
     pygame.display.flip()
     clock.tick(60)
