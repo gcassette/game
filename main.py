@@ -39,6 +39,11 @@ while running:
         if state == 'playing':
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 player.shoot()
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                state = 'pause'
+        elif state == 'pause':
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                state = 'playing'
         elif state == 'title':
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 state = "level_init"  # Start the game     
@@ -97,7 +102,7 @@ while running:
         # ライフが0になったらゲーム終了
         if player_life.current_lives <= 0:
             print("ゲームオーバー")
-            state = 'title_init'
+            state = 'game_over_init'
 
         all_sprites.update()
         background.update()
@@ -107,6 +112,25 @@ while running:
         screen.blit(timer_text, (650, 10))
 
         player_life.draw(screen)
+
+    elif state == 'game_over_init':
+        GAME_OVER = pygame.image.load('assets/GAME_OVER.png').convert()
+        title_button = pygame.image.load('assets/title_button.png').convert()
+        title_button_hover = pygame.image.load('assets/title_button_hover.png').convert()
+        title_button_rect = play_button.get_rect(center=(402, 530))
+        state = 'game_over'
+
+    elif state == 'game_over':
+        screen.blit(GAME_OVER, (0,0))
+        # play button
+        mouse_pos = pygame.mouse.get_pos()
+        mouse_click = pygame.mouse.get_pressed()
+        if title_button_rect.collidepoint(mouse_pos):
+            screen.blit(title_button_hover, title_button_rect)
+            if mouse_click[0]:  # Left-click
+                state = 'title_init'
+        else:
+            screen.blit(title_button, title_button_rect)
 
     elif state == 'title':      # display title
         screen.blit(bg_title, (0,0))    # background image
@@ -230,6 +254,10 @@ while running:
         level_start_time = pygame.time.get_ticks() // 1000  #define the level time started
 
         state = 'playing'
+
+    elif state == 'pause':
+        paused = pygame.image.load('assets/paused.png').convert()
+        screen.blit(paused, (0,0))
 
     pygame.display.flip()
     clock.tick(60)
