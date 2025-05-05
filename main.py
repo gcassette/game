@@ -26,30 +26,6 @@ pygame.mixer.music.play(-1)
 pygame.mixer.music.set_volume(0.02)
 damage_sound = pygame.mixer.Sound("assets/レトロアクション_3.mp3")
 damage_sound.set_volume(0.05)
-player_life = Life(max_lives=5)
-background = Background(SCREEN_WIDTH, SCREEN_WIDTH, scroll_speed=1)
-
-all_sprites = pygame.sprite.Group()
-sprite_enemies = pygame.sprite.Group()
-bullets = pygame.sprite.Group()
-enemy_projectiles = pygame.sprite.Group()
-
-ene_pro_manager = SpriteGroups.EnemyProjectile.EnemyProjectileManager(all_sprites, enemy_projectiles)
-
-player = Player(screen, all_sprites)
-enemy = Enemy(screen, ene_pro_manager)
-wander_enemy = WanderEnemy(screen, ene_pro_manager)
-chase_enemy = ChaseEnemy(screen, ene_pro_manager, lambda: player.pos, update_interval=5)
-# 敵のグループを作成
-enemies = pygame.sprite.Group()
-
-all_sprites.add(player)
-all_sprites.add(enemy)
-all_sprites.add(wander_enemy)
-all_sprites.add(chase_enemy)
-enemies.add(enemy, wander_enemy, chase_enemy)  # ← ここ追加
-
-all_sprites.add(sprite_enemies)
 
 clock = pygame.time.Clock()
 
@@ -94,27 +70,6 @@ while running:
         timer_text = font.render(f"Time: {time_ramaining}s", True, (255, 255, 255))
         # --- 衝突判定 ---
 
-        # Player と 敵本体の当たり判定
-        if pygame.sprite.spritecollide(player, enemies, False, collided=pygame.sprite.collide_rect):
-            player_life.lose_life()
-            damage_sound.play()
-
-        # Player と Fireball の当たり判定
-        if pygame.sprite.spritecollide(player, enemy_projectiles, True, collided=pygame.sprite.collide_rect):
-            player_life.lose_life()
-            damage_sound.play()
-
-        # wander_enemy と bullets の当たり判定
-        if pygame.sprite.spritecollide(wander_enemy, bullets, True, collided=pygame.sprite.collide_rect):
-            wander_enemy.take_damage()
-
-            if wander_enemy.hp <= 0:
-                wander_enemy.kill()
-
-        # ライフが0になったらゲーム終了
-        if player_life.current_lives <= 0:
-            print("ゲームオーバー")
-            state = 'title_init'
         if collided_enemies := pygame.sprite.spritecollide(player, enemies, False, collided=pygame.sprite.collide_mask):
             if not player.invincible:  # ← この条件を追加
                 player_life.lose_life()
@@ -131,7 +86,7 @@ while running:
 
         # Player と Fireball の当たり判定
         if collided_fireballs := pygame.sprite.spritecollide(player, enemy_projectiles, True, collided=pygame.sprite.collide_mask):
-            #player_life.lose_life()
+            player_life.lose_life()
             damage_sound.play()
         # wander_enemy と bullets の当たり判定
         if collided_bullets := pygame.sprite.spritecollide(wander_enemy, bullets, True, collided=pygame.sprite.collide_mask):
@@ -139,12 +94,19 @@ while running:
             if wander_enemy.hp <= 0:
                 wander_enemy.kill()
 
+        # ライフが0になったらゲーム終了
+        if player_life.current_lives <= 0:
+            print("ゲームオーバー")
+            state = 'title_init'
+
+        all_sprites.update()
+        background.update()
+        background.draw(screen)
+        all_sprites.draw(screen)
+
         screen.blit(timer_text, (650, 10))
 
         player_life.draw(screen)
-
-        all_sprites.update()
-        all_sprites.draw(screen)
 
     elif state == 'title':      # display title
         screen.blit(bg_title, (0,0))    # background image
@@ -239,8 +201,6 @@ while running:
 
 
     elif state == 'level_init': # initialize game screen
-        player_life = Life(max_lives=5)
-        background = Background(SCREEN_WIDTH, SCREEN_WIDTH, scroll_speed=1)
 
         all_sprites = pygame.sprite.Group()
         sprite_enemies = pygame.sprite.Group()
@@ -252,13 +212,20 @@ while running:
         player = Player(screen, all_sprites)
         enemy = Enemy(screen, ene_pro_manager)
         wander_enemy = WanderEnemy(screen, ene_pro_manager)
+        chase_enemy = ChaseEnemy(screen, ene_pro_manager, lambda: player.pos, update_interval=5)
+        # 敵のグループを作成
+        enemies = pygame.sprite.Group()
 
-        enemies = pygame.sprite.Group()  # ← ここ追加
         all_sprites.add(player)
         all_sprites.add(enemy)
         all_sprites.add(wander_enemy)
+        all_sprites.add(chase_enemy)
+        enemies.add(enemy, wander_enemy, chase_enemy)  # ← ここ追加
 
         all_sprites.add(sprite_enemies)
+
+        player_life = Life(max_lives=5)
+        background = Background(SCREEN_WIDTH, SCREEN_WIDTH, scroll_speed=1)
 
         level_start_time = pygame.time.get_ticks() // 1000  #define the level time started
 
