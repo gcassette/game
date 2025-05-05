@@ -40,6 +40,17 @@ while running:
         elif state == 'title':
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 state = "level_init"  # Start the game     
+        elif state == 'story':
+            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:  # Left mouse button released
+                if next_button_rect.collidepoint(event.pos):
+                    if scene == 'scene1':
+                        scene = 'scene2'
+                    elif scene == 'scene2':
+                        scene = 'scene3'
+                    elif scene == 'scene3':
+                        scene = 'scene4'                        
+                if scene == 'scene4' and play_button_rect.collidepoint(event.pos):
+                    state = 'level_init'
 
     if state == 'playing':
         all_sprites.update()
@@ -90,22 +101,95 @@ while running:
 
     elif state == 'title':      # display title
         screen.blit(bg_title, (0,0))    # background image
-        title_text = japanese_font.render("カルシウム王子の冒険", True, (0, 0, 0))
-        # prompt_text = font.render("Press SPACE to Start", True, (0, 0, 0))
-        screen.blit(title_text, title_text.get_rect(center=(400, 50)))
-        # screen.blit(prompt_text, prompt_text.get_rect(center=(400, 350)))
 
         if (pygame.time.get_ticks() % 1000 - 500) < 0: #display image in turn every .5 sec
-            screen.blit(calcium_1,(300,70))
+            screen.blit(calcium_1,calcium_1.get_rect(center=(410,350)))
         else:
-            screen.blit(calcium_2,(300,70))
+            screen.blit(calcium_2,calcium_2.get_rect(center=(410,350)))
+
+        screen.blit(title_logo,title_logo.get_rect(center=(400,50)))   # title logo
+
+        # play button
+        mouse_pos = pygame.mouse.get_pos()
+        mouse_click = pygame.mouse.get_pressed()
+        if play_button_rect.collidepoint(mouse_pos):
+            screen.blit(play_button_hover, play_button_rect)
+            if mouse_click[0]:  # Left-click
+                state = 'level_init'
+        else:
+            screen.blit(play_button, play_button_rect)
+
+        if story_button_rect.collidepoint(mouse_pos):
+            screen.blit(story_button_hover, story_button_rect)
+            if mouse_click[0]:  # Left-click
+                state = 'story_init'
+        else:
+            screen.blit(story_button, story_button_rect)
+
 
     elif state == 'title_init': # initialize title screen
         bg_title = pygame.image.load('assets/bg_title.png').convert()
         calcium_1 = pygame.image.load("assets/calcium_title_1.png").convert_alpha()
         calcium_2 = pygame.image.load("assets/calcium_title_2.png").convert_alpha()
-        title_logo = pygame.image.load("assets/calcium_title_1.png").convert_alpha()
+        title_logo = pygame.image.load("assets/title_logo.png").convert_alpha()
+        play_button = pygame.image.load("assets/play_button.png").convert_alpha()
+        play_button_hover = pygame.image.load("assets/play_button_hover.png").convert_alpha()
+        play_button_rect = play_button.get_rect(center=(402, 380))
+        story_button = pygame.image.load("assets/story_button.png").convert_alpha()
+        story_button_hover = pygame.image.load("assets/story_button_hover.png").convert_alpha()
+        story_button_rect = story_button.get_rect(center=(402, 460))
+
         state = 'title'
+
+    elif state == 'story_init':
+        story_bg1 = pygame.image.load('assets/story_bg1.png').convert()
+        story_bg2 = pygame.image.load('assets/story_bg2.png').convert()
+        story_bg3 = pygame.image.load('assets/story_bg3.png').convert()
+        story_bg4 = pygame.image.load('assets/story_bg4.png').convert()
+        calcium_story_1 = pygame.image.load("assets/calcium_story_1.png").convert_alpha()
+        calcium_story_2 = pygame.image.load("assets/calcium_story_2.png").convert_alpha()
+        next_button = pygame.image.load("assets/next_button.png").convert_alpha()
+        next_button_hover = pygame.image.load("assets/next_button_hover.png").convert_alpha()
+        next_button_rect = next_button.get_rect(center=(700, 530))
+        play_button = pygame.image.load("assets/play_button.png").convert_alpha()
+        play_button_hover = pygame.image.load("assets/play_button_hover.png").convert_alpha()
+        play_button_rect = play_button.get_rect(center=(402, 530))
+        state = 'story'
+        scene = 'scene1'
+
+
+    elif state == 'story':
+        if scene == 'scene1':
+            screen.blit(story_bg1, (0,0))
+            if (pygame.time.get_ticks() % 1000 - 500) < 0: #display image in turn every .5 sec
+                    screen.blit(calcium_story_1,calcium_story_1.get_rect(center=(400,530)))
+            else:
+                screen.blit(calcium_story_2,calcium_story_2.get_rect(center=(400,530)))
+
+        elif scene == 'scene2':
+            screen.blit(story_bg2, (0,0))
+
+        elif scene == 'scene3':
+            screen.blit(story_bg3, (0,0))
+
+        elif scene == 'scene4':
+            screen.blit(story_bg4, (0,0))
+            mouse_pos = pygame.mouse.get_pos()
+            mouse_click = pygame.mouse.get_pressed()
+            if play_button_rect.collidepoint(mouse_pos):
+                screen.blit(play_button_hover, play_button_rect)    
+            else:
+                screen.blit(play_button, play_button_rect)
+
+
+        if not scene == 'scene4':
+            mouse_pos = pygame.mouse.get_pos()
+            mouse_click = pygame.mouse.get_pressed()
+            if next_button_rect.collidepoint(mouse_pos):
+                screen.blit(next_button_hover, next_button_rect)    
+            else:
+                screen.blit(next_button, next_button_rect)
+
 
     elif state == 'level_init': # initialize game screen
         player_life = Life(max_lives=5)
