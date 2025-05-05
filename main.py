@@ -2,6 +2,7 @@ import pygame
 from Character.Player import Player
 from Character.Enemy import Enemy
 from Character.WanderEnemy import WanderEnemy
+from Character.ChaseEnemy import ChaseEnemy
 from Life import Life
 from Background import Background
 import SpriteGroups.EnemyProjectile
@@ -35,11 +36,15 @@ ene_pro_manager = SpriteGroups.EnemyProjectile.EnemyProjectileManager(all_sprite
 player = Player(screen, all_sprites)
 enemy = Enemy(screen, ene_pro_manager)
 wander_enemy = WanderEnemy(screen, ene_pro_manager)
+chase_enemy = ChaseEnemy(screen, ene_pro_manager, lambda: player.pos, update_interval=5)
+# 敵のグループを作成
+enemies = pygame.sprite.Group()
 
-enemies = pygame.sprite.Group()  # ← ここ追加
 all_sprites.add(player)
 all_sprites.add(enemy)
 all_sprites.add(wander_enemy)
+all_sprites.add(chase_enemy)
+enemies.add(enemy, wander_enemy, chase_enemy)  # ← ここ追加
 
 all_sprites.add(sprite_enemies)
 
@@ -67,23 +72,62 @@ while running:
     timer_text = font.render(f"Time: {time_ramaining}s", True, (255, 255, 255))
     # --- 衝突判定 ---
 
-    # Player と 敵本体の当たり判定
-    if pygame.sprite.spritecollide(player, enemies, False, collided=pygame.sprite.collide_rect):
-        player_life.lose_life()
-        damage_sound.play()
+    if collided_enemies := pygame.sprite.spritecollide(player, enemies, False, collided=pygame.sprite.collide_mask):
+        if not player.invincible:  # ← この条件を追加
+            player_life.lose_life()
+            damage_sound.play()
+            player.trigger_invincibility(duration_frames=300)
+            print("Player hit by enemy!")
+
+            for collided_enemy in collided_enemies:
+                if isinstance(collided_enemy, ChaseEnemy):
+                    collided_enemy.trigger_cooldown(frames=120)
+
+
+
 
     # Player と Fireball の当たり判定
-    if pygame.sprite.spritecollide(player, enemy_projectiles, True, collided=pygame.sprite.collide_rect):
-        player_life.lose_life()
-        damage_sound.play()
+    if collided_fireballs := pygame.sprite.spritecollide(player, enemy_projectiles, True, collided=pygame.sprite.collide_mask):
+        #player_life.lose_life()
+        #damage_sound.play()
+        #print("Player hit by enemy projectile!")
+        #playerとbulletの座標を出力
+        # print(f"Player Position: {player.pos.x}, {player.pos.y}")
+        # for proj in enemy_projectiles:
+        #     print(f"Enemy Projectile Position: {proj.pos.x}, {proj.pos.y}")
+        pass
 
     # WanderEnemy と bullets の当たり判定
     # wander_enemy と bullets の当たり判定
-    if pygame.sprite.spritecollide(wander_enemy, bullets, True, collided=pygame.sprite.collide_rect):
+    if collided_bullets := pygame.sprite.spritecollide(wander_enemy, bullets, True, collided=pygame.sprite.collide_mask):
         wander_enemy.take_damage()
+        print("WanderEnemy hit by bullet!")
 
         if wander_enemy.hp <= 0:
             wander_enemy.kill()
+
+    # Player と 敵本体の当たり判定
+    # if pygame.sprite.spritecollide(player, chase_enemy, False, collided=pygame.sprite.collide_rect):
+    #     player_life.lose_life()
+    #     damage_sound.play()
+    #     chase_enemy.trigger_cooldown(frames=120)
+
+    # collided_list = pygame.sprite.spritecollide(player, enemies, False, collided=pygame.sprite.collide_rect)
+    # if collided_list:
+    #     player_life.lose_life()
+    #     damage_sound.play()
+    #     for collided_enemy in collided_list:
+    #         if isinstance(collided_enemy, ChaseEnemy):
+    #             collided_enemy.trigger_cooldown(frames=120)
+
+    # for collided_enemy in enemies:
+    #     if collided_enemy.rect.colliderect(player.get_enlarged_rect(100)):
+    #         player_life.lose_life()
+    #         damage_sound.play()
+
+    #         if isinstance(collided_enemy, ChaseEnemy):
+    #             collided_enemy.trigger_cooldown(frames=120)
+
 
     # ライフが0になったらゲーム終了
     if player_life.current_lives <= 0:

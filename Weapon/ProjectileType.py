@@ -25,6 +25,8 @@ class Projectile(ABC, pygame.sprite.Sprite):
         self.beam_sound = pygame.mixer.Sound(SE_BULLET_LINER)
         self.beam_sound.set_volume(SE_VOLUME)
         self.SPEED = 10
+        
+        
     
     #表示画像を生成する
     @abstractmethod
@@ -32,7 +34,6 @@ class Projectile(ABC, pygame.sprite.Sprite):
         pass
 
     def get_init_velocity(self) -> pygame.math.Vector2:
-        print("shoot_direction2", self.shoot_direction())
         return self.shoot_direction() * self.SPEED
 
 
@@ -49,18 +50,23 @@ class Projectile(ABC, pygame.sprite.Sprite):
 
         #self.pos = pygame.math.Vector2(pos)
         self.image = self.create_image()
+        self.mask = pygame.mask.from_surface(self.image) #当たり判定用のマスクを作成
         self.rect = self.image.get_rect(center=self.pos)
         self.velocity = self.get_init_velocity()
         self.beam_sound.play()
 
     def update(self):
         if(not self.enable): return
-        print(self.pos)
-        print(self.velocity)
         self.pos += self.velocity
         self.rect.center = (round(self.pos.x), round(self.pos.y))
 
+        #fireballの場合、座標を出力
+        if self._name == NAME_PROJECTILE_FIRE:
+            print(f"Fireball Position: {self.pos[0]}, {self.pos[1]}")
+
         if not self.screen.get_rect().colliderect(self.rect):
+            #座標を出力
+            print(f"Projectile Position: {self.pos[0]}, {self.pos[1]}")
             self.kill()
 
 class BulletLinerly(Projectile):
@@ -103,6 +109,9 @@ class Fireball(Projectile):
         image = pygame.Surface(self.SIZE, pygame.SRCALPHA)
         image.fill(self.COLOR)
         pygame.draw.circle(image, self.COLOR, self.SPRITE_COORDINATE, self.SPRITE_RADIUS)  # 赤オレンジの火の玉
+        #fireballの座標を出力
+        print(f"Fireball Position: {self.pos[0]}, {self.pos[1]}")
+
         
         
         return image

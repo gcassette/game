@@ -16,6 +16,9 @@ class Player(Character):
         self.angle = 0
         self.screen = screen
 
+        self.invincible = False         # ← 無敵状態フラグ
+        self.invincible_timer = 0       # ← 無敵タイマー（フレーム数）
+
         super().__init__(Player_IMG_PATH, POSITION_START, sprite_manager, SPEED_PLAYER, MAXHP_PLAYER)
         
 
@@ -28,6 +31,15 @@ class Player(Character):
         self.pos.y = max(0, min(self.screen.get_height(), self.pos.y))
 
     def update(self):
+
+        # 無敵状態タイマーのカウントダウン
+        #無敵常態か否かを出力
+        print(f"Invincible: {self.invincible}")
+        if self.invincible:
+            self.invincible_timer -= 1
+            if self.invincible_timer <= 0:
+                self.invincible = False
+
         keys = pygame.key.get_pressed()
         if keys[pygame.K_w]:
             self.angle += ROTATE_SPEED
@@ -50,8 +62,11 @@ class Player(Character):
          # ← 左に向いてるときだけ左右反転
         if self.direction.x < 0:
             self.image = pygame.transform.flip(self.image, True, False)
+            self.mask = pygame.mask.from_surface(self.image)  # ← 画像変更後に再生成
 
         self.rect = self.image.get_rect(center=self.rect.center)
+        #座標を出力
+        #print(f"Player Position: {self.pos.x}, {self.pos.y}")
 
     def shoot(self):
         self.weapon.shoot()
@@ -68,3 +83,7 @@ class Player(Character):
             self.screen
         )
         self.weapon.resister_bullet(bullet_type)
+
+    def trigger_invincibility(self, duration_frames=60):
+        self.invincible = True
+        self.invincible_timer = duration_frames  # 60フレーム = 約1秒 (60FPSの場合)
