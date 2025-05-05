@@ -10,7 +10,7 @@ NAME_PROJECTILE_FIRE = "FireBall"
 
 #投射物の抽象クラス
 class Projectile(ABC, pygame.sprite.Sprite):
-    def __init__(self, _name, get_position_func, shoot_direction, screen):
+    def __init__(self, _name, get_position_func, shoot_direction,screen):
         super().__init__()
         self._name = _name
         self.screen = screen
@@ -25,6 +25,8 @@ class Projectile(ABC, pygame.sprite.Sprite):
         self.beam_sound = pygame.mixer.Sound(SE_BULLET_LINER)
         self.beam_sound.set_volume(SE_VOLUME)
         self.SPEED = 10
+        
+        
     
     #表示画像を生成する
     @abstractmethod
@@ -48,26 +50,26 @@ class Projectile(ABC, pygame.sprite.Sprite):
 
         #self.pos = pygame.math.Vector2(pos)
         self.image = self.create_image()
+        self.mask = pygame.mask.from_surface(self.image) #当たり判定用のマスクを作成
         self.rect = self.image.get_rect(center=self.pos)
         self.velocity = self.get_init_velocity()
         self.beam_sound.play()
 
     def update(self):
         if(not self.enable): return
-        print(self.pos)
-        print(self.velocity)
         self.pos += self.velocity
         self.rect.center = (round(self.pos.x), round(self.pos.y))
 
         if not self.screen.get_rect().colliderect(self.rect):
+
             self.kill()
 
 class BulletLinerly(Projectile):
     SIZE = (10,10)
     COLOR = (255, 255, 0)
 
-    def __init__(self, get_position_func, get_angle_func, screen):
-        super().__init__(NAME_PROJECTILE_LINER, get_position_func, get_angle_func, screen)
+    def __init__(self, get_position_func, shoot_direction, screen):
+        super().__init__(NAME_PROJECTILE_LINER, get_position_func, shoot_direction, screen)
         self.SPEED = 10
 
     def create_image(self) -> pygame.Surface:
@@ -102,6 +104,9 @@ class Fireball(Projectile):
         image = pygame.Surface(self.SIZE, pygame.SRCALPHA)
         image.fill(self.COLOR)
         pygame.draw.circle(image, self.COLOR, self.SPRITE_COORDINATE, self.SPRITE_RADIUS)  # 赤オレンジの火の玉
+
+
+        
         
         return image
     

@@ -7,6 +7,7 @@ class Character(pygame.sprite.Sprite, ABC):
         super().__init__()
         self.original_image = pygame.image.load(image_path).convert_alpha()
         self.image = self.original_image.copy()
+        self.mask = pygame.mask.from_surface(self.image) #当たり判定用のマスクを作成
         #characterのscreen上の位置をrectで管理する、
         self.rect = self.image.get_rect(center=start_pos)
         #characterの本当の位置をposで管理する、
@@ -39,4 +40,12 @@ class Character(pygame.sprite.Sprite, ABC):
         self.hp -= damage
         if self.hp <= 0:
             self.kill()
+
+    def get_pos(self):
+        return self.pos
+    
+    def get_enlarged_rect(self, padding: int = 10):
+        enlarged = self.rect.inflate(padding, padding)
+        return enlarged
+
      
