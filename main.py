@@ -3,6 +3,7 @@ from Character.Player import Player
 from Character.Enemy import Enemy
 from Character.WanderEnemy import WanderEnemy
 from Character.ChaseEnemy import ChaseEnemy
+from Character.LinearEnemy import LinearEnemy
 from Life import Life
 from Background import Background
 import SpriteGroups.EnemyProjectile
@@ -24,8 +25,8 @@ pygame.mixer.init()
 pygame.mixer.music.load("assets/\u571f\u661f\u30c0\u30f3\u30b9.mp3")
 pygame.mixer.music.play(-1)
 pygame.mixer.music.set_volume(0.02)
-damage_sound = pygame.mixer.Sound("assets/レトロアクション_3.mp3")
-damage_sound.set_volume(0.05)
+enemy_damage_sound = pygame.mixer.Sound("assets/ショット命中.mp3")
+enemy_damage_sound.set_volume(0.05)
 
 clock = pygame.time.Clock()
 
@@ -88,16 +89,21 @@ while running:
 
 
 
-
         # Player と Fireball の当たり判定
+        print("enemy_projectiles:", enemy_projectiles)
         if collided_fireballs := pygame.sprite.spritecollide(player, enemy_projectiles, True, collided=pygame.sprite.collide_mask):
             player_life.lose_life()
             damage_sound.play()
-        # wander_enemy と bullets の当たり判定
-        if collided_bullets := pygame.sprite.spritecollide(wander_enemy, bullets, True, collided=pygame.sprite.collide_mask):
-            wander_enemy.take_damage()
-            if wander_enemy.hp <= 0:
-                wander_enemy.kill()
+        # 全ての敵と bullets の当たり判定
+        for enemy in enemies:
+            print("bullets:", bullets)
+            collided_bullets = pygame.sprite.spritecollide(enemy, bullets, True, collided=pygame.sprite.collide_mask)
+            if collided_bullets:
+                enemy.take_damage()
+                enemy_damage_sound.play()
+                print(f"Enemy {enemy} hit by bullet!")
+                if enemy.hp <= 0:
+                    enemy.kill()
 
         # ライフが0になったらゲーム終了
         if player_life.current_lives <= 0:
@@ -158,6 +164,8 @@ while running:
                 state = 'story_init'
         else:
             screen.blit(story_button, story_button_rect)
+
+
 
 
     elif state == 'title_init': # initialize title screen
@@ -226,27 +234,34 @@ while running:
 
     elif state == 'level_init': # initialize game screen
 
+
+
         all_sprites = pygame.sprite.Group()
         sprite_enemies = pygame.sprite.Group()
         bullets = pygame.sprite.Group()
         enemy_projectiles = pygame.sprite.Group()
 
-        ene_pro_manager = SpriteGroups.EnemyProjectile.EnemyProjectileManager(all_sprites, enemy_projectiles)
-
         player = Player(screen, all_sprites)
-        enemy = Enemy(screen, ene_pro_manager)
-        wander_enemy = WanderEnemy(screen, ene_pro_manager)
-        chase_enemy = ChaseEnemy(screen, ene_pro_manager, lambda: player.pos, update_interval=5)
+        #enemy = Enemy(screen, all_sprites, enemy_projectiles)
+        wander_enemy = WanderEnemy(screen, all_sprites, enemy_projectiles)
+        chase_enemy = ChaseEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos, update_interval=120)
+        LinearEnemy = LinearEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos)
         # 敵のグループを作成
         enemies = pygame.sprite.Group()
 
+
+
         all_sprites.add(player)
-        all_sprites.add(enemy)
+        #all_sprites.add(enemy)
         all_sprites.add(wander_enemy)
         all_sprites.add(chase_enemy)
-        enemies.add(enemy, wander_enemy, chase_enemy)  # ← ここ追加
+        all_sprites.add(LinearEnemy)
+        enemies.add(wander_enemy, chase_enemy)  # ← ここ追加
+        enemies.add(LinearEnemy)  # ← ここ追加
 
         all_sprites.add(sprite_enemies)
+        all_sprites.add(bullets)
+        all_sprites.add(enemy_projectiles)
 
         player_life = Life(max_lives=5)
         background = Background(SCREEN_WIDTH, SCREEN_WIDTH, scroll_speed=1)

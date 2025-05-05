@@ -50,10 +50,12 @@ class Projectile(ABC, pygame.sprite.Sprite):
 
         #self.pos = pygame.math.Vector2(pos)
         self.image = self.create_image()
-        self.mask = pygame.mask.from_surface(self.image) #当たり判定用のマスクを作成
         self.rect = self.image.get_rect(center=self.pos)
+        self.mask = pygame.mask.from_surface(self.image) #当たり判定用のマスクを作成
         self.velocity = self.get_init_velocity()
         self.beam_sound.play()
+        print(f"shoot {self._name}")
+        print(f"pos: {self.pos[0]}, {self.pos[1]}")
 
     def update(self):
         if(not self.enable): return
@@ -65,20 +67,28 @@ class Projectile(ABC, pygame.sprite.Sprite):
             self.kill()
 
 class BulletLinerly(Projectile):
-    SIZE = (10,10)
-    COLOR = (255, 255, 0)
+    SIZE = (12,12)
+    COLOR = (255, 100, 0)
+    
+    SPRITE_COORDINATE = (6, 6)
+    SPRITE_RADIUS = 6
+    
 
     def __init__(self, get_position_func, shoot_direction, screen):
         super().__init__(NAME_PROJECTILE_LINER, get_position_func, shoot_direction, screen)
         self.SPEED = 10
 
+    # def create_image(self) -> pygame.Surface:
+    #     image = pygame.Surface(self.SIZE, pygame.SRCALPHA)  # ← 重要：透過情報つき
+    #     image.fill(self.COLOR)
+    #     pygame.draw.circle(image, self.COLOR, self.SPRITE_COORDINATE, self.SPRITE_RADIUS)  # 赤オレンジの火の玉
+    #     return image
     def create_image(self) -> pygame.Surface:
-        super().create_image()
-        image = pygame.Surface(self.SIZE)
+        image = pygame.Surface(self.SIZE, pygame.SRCALPHA)
         image.fill(self.COLOR)
+        pygame.draw.circle(image, (255, 255, 0), self.SPRITE_COORDINATE, self.SPRITE_RADIUS)  # 弾本体を黄色に
+        print("create_image")
         return image
-
-    
     def clone(self):
         return BulletLinerly(self.get_position, self.shoot_direction, self.screen)
 
@@ -104,9 +114,6 @@ class Fireball(Projectile):
         image = pygame.Surface(self.SIZE, pygame.SRCALPHA)
         image.fill(self.COLOR)
         pygame.draw.circle(image, self.COLOR, self.SPRITE_COORDINATE, self.SPRITE_RADIUS)  # 赤オレンジの火の玉
-
-
-        
         
         return image
     
