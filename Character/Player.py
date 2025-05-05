@@ -81,12 +81,18 @@ class Player(Character):
         self.weapon.shoot()
 
     @property
+    # def shoot_direction(self):
+    #     angle_rad = math.radians(self.angle)
+    #     direction = pygame.math.Vector2(math.cos(angle_rad), math.sin(angle_rad))
+    #     if self.facing_left:
+    #         direction *= -1  # 左向きなら逆方向に発射
+    #     return direction
     def shoot_direction(self):
-        angle_rad = math.radians(self.angle)
-        direction = pygame.math.Vector2(math.cos(angle_rad), math.sin(angle_rad))
+        angle_rad = math.radians(-self.angle)  # pygame は時計回りが正なので -angle
+        if not self.facing_left:
+            return pygame.math.Vector2(math.cos(angle_rad), math.sin(angle_rad))
         if self.facing_left:
-            direction *= -1  # 左向きなら逆方向に発射
-        return direction
+            return pygame.math.Vector2(-math.cos(angle_rad), math.sin(angle_rad))
 
     def set_bullets(self):
         bullet_type = ProjectileType.BulletLinerly(
