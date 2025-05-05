@@ -3,7 +3,7 @@ import random
 import Weapon.ProjectileType as ProjectileType
 from Character.Character import Character
 
-IMG_WEnemy = 'assets//enemy_sake.png'
+IMG_WEnemy = 'assets//enemy_coffee.png'
 
 class WanderEnemy(Character):
     def __init__(self, screen, projectiles_manager):

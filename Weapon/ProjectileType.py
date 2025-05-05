@@ -50,8 +50,8 @@ class Projectile(ABC, pygame.sprite.Sprite):
 
         #self.pos = pygame.math.Vector2(pos)
         self.image = self.create_image()
-        self.mask = pygame.mask.from_surface(self.image) #当たり判定用のマスクを作成
         self.rect = self.image.get_rect(center=self.pos)
+        self.mask = pygame.mask.from_surface(self.image) #当たり判定用のマスクを作成
         self.velocity = self.get_init_velocity()
         self.beam_sound.play()
 
@@ -65,8 +65,12 @@ class Projectile(ABC, pygame.sprite.Sprite):
             self.kill()
 
 class BulletLinerly(Projectile):
-    SIZE = (10,10)
+    SIZE = (12,12)
     COLOR = (255, 255, 0)
+    
+    SPRITE_COORDINATE = (6, 6)
+    SPRITE_RADIUS = 6
+    
 
     def __init__(self, get_position_func, shoot_direction, screen):
         super().__init__(NAME_PROJECTILE_LINER, get_position_func, shoot_direction, screen)
@@ -74,10 +78,10 @@ class BulletLinerly(Projectile):
 
     def create_image(self) -> pygame.Surface:
         super().create_image()
-        image = pygame.Surface(self.SIZE)
+        image = pygame.Surface(self.SIZE, pygame.SRCALPHA)  # ← 重要：透過情報つき
         image.fill(self.COLOR)
+        pygame.draw.circle(image, self.COLOR, self.SPRITE_COORDINATE, self.SPRITE_RADIUS)  # 赤オレンジの火の玉
         return image
-
     
     def clone(self):
         return BulletLinerly(self.get_position, self.shoot_direction, self.screen)
@@ -104,9 +108,6 @@ class Fireball(Projectile):
         image = pygame.Surface(self.SIZE, pygame.SRCALPHA)
         image.fill(self.COLOR)
         pygame.draw.circle(image, self.COLOR, self.SPRITE_COORDINATE, self.SPRITE_RADIUS)  # 赤オレンジの火の玉
-
-
-        
         
         return image
     

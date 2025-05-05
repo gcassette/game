@@ -35,9 +35,7 @@ class ChaseEnemy(Character):
         self.update_counter += 1
 
         # 指定フレームごとに方向を更新（追尾）
-        print(f"ChaseEnemy update_counter:,self.update_interval {self.update_counter,self.update_interval}")
         if self.update_counter >= self.update_interval:
-            print("ChaseEnemy update_counter >= self.update_interval")
             target_pos = pygame.math.Vector2(self.get_player_pos())
             direction = target_pos - self.pos
             if direction.length_squared() > 0:
