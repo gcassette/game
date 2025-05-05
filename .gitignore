@@ -1,6 +1,6 @@
 *.pyc
-__pycache__/
-Character/__pycache__/
-CommonSystem/__pycache__
-SpriteGroups/__pycache__
-Weapon/__pycache__
+__pycache__/*.pyc
+Character/__pycache__/*.pyc
+CommonSystem/__pycache__/*.pyc
+SpriteGroups/__pycache__/*.pyc
+Weapon/__pycache__/*.pyc
