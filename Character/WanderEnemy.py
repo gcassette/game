@@ -8,7 +8,7 @@ IMG_WEnemy = 'assets//enemy_sake.png'
 class WanderEnemy(Character):
     def __init__(self, screen, projectiles_manager):
         self.screen = screen
-        super().__init__(IMG_WEnemy, (random.randint(100, 700), random.randint(100, 500)), projectiles_manager, speed=2.0, max_hp=2)
+        super().__init__(IMG_WEnemy, (random.randint(100, 700), random.randint(100, 500)), projectiles_manager, speed=0.5, max_hp=2)
         
         self.phase = "wander"
         self.wait_counter = 0
