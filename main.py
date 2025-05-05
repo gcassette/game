@@ -35,25 +35,28 @@ sprite_enemies = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 enemy_projectiles = pygame.sprite.Group()
 
-ene_pro_manager = SpriteGroups.EnemyProjectile.EnemyProjectileManager(all_sprites, enemy_projectiles)
+#ene_pro_manager = SpriteGroups.EnemyProjectile.EnemyProjectileManager(all_sprites, enemy_projectiles)
 
-player = Player(screen, all_sprites)
-enemy = Enemy(screen, ene_pro_manager)
-wander_enemy = WanderEnemy(screen, ene_pro_manager)
-chase_enemy = ChaseEnemy(screen, ene_pro_manager, lambda: player.pos, update_interval=120)
-LinearEnemy = LinearEnemy(screen, ene_pro_manager, lambda: player.pos)
+player = Player(screen, all_sprites, bullets)  # ← bullets を追加
+
+#enemy = Enemy(screen, all_sprites, enemy_projectiles)
+wander_enemy = WanderEnemy(screen, all_sprites, enemy_projectiles)
+chase_enemy = ChaseEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos, update_interval=120)
+LinearEnemy = LinearEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos)
 # 敵のグループを作成
 enemies = pygame.sprite.Group()
 
 all_sprites.add(player)
-all_sprites.add(enemy)
+#all_sprites.add(enemy)
 all_sprites.add(wander_enemy)
 all_sprites.add(chase_enemy)
 all_sprites.add(LinearEnemy)
-enemies.add(enemy, wander_enemy, chase_enemy)  # ← ここ追加
+enemies.add(wander_enemy, chase_enemy)  # ← ここ追加
 enemies.add(LinearEnemy)  # ← ここ追加
 
 all_sprites.add(sprite_enemies)
+all_sprites.add(bullets)
+all_sprites.add(enemy_projectiles)
 
 clock = pygame.time.Clock()
 running = True
@@ -94,8 +97,9 @@ while running:
 
 
     # Player と Fireball の当たり判定
+    print("enemy_projectiles:", enemy_projectiles)
     if collided_fireballs := pygame.sprite.spritecollide(player, enemy_projectiles, True, collided=pygame.sprite.collide_mask):
-        #player_life.lose_life()
+        player_life.lose_life()
         damage_sound.play()
     # 全ての敵と bullets の当たり判定
     for enemy in enemies:
