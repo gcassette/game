@@ -42,7 +42,7 @@ player = Player(screen, all_sprites, bullets)  # ← bullets を追加
 #enemy = Enemy(screen, all_sprites, enemy_projectiles)
 wander_enemy = WanderEnemy(screen, all_sprites, enemy_projectiles)
 chase_enemy = ChaseEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos, update_interval=120)
-LinearEnemy = LinearEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos)
+linearEnemy = LinearEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos)
 # 敵のグループを作成
 enemies = pygame.sprite.Group()
 
@@ -50,9 +50,9 @@ all_sprites.add(player)
 #all_sprites.add(enemy)
 all_sprites.add(wander_enemy)
 all_sprites.add(chase_enemy)
-all_sprites.add(LinearEnemy)
+all_sprites.add(linearEnemy)
 enemies.add(wander_enemy, chase_enemy)  # ← ここ追加
-enemies.add(LinearEnemy)  # ← ここ追加
+enemies.add(linearEnemy)  # ← ここ追加
 
 all_sprites.add(sprite_enemies)
 all_sprites.add(bullets)
