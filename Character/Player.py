@@ -2,6 +2,7 @@ import pygame
 from Character.Character import Character
 import Weapon.ProjectileType as ProjectileType
 import math
+from Weapon.Weapon import Weapon
 
 
 Player_IMG_PATH = 'assets//calcium.png'
@@ -12,14 +13,15 @@ ROTATE_SPEED = 3  # 回転速度（度単位）
 
 
 class Player(Character):
-    def __init__(self, screen, sprite_manager):
+    def __init__(self, screen, all_sprites, enemy_projectiles):
         self.angle = 0
         self.screen = screen
 
         self.invincible = False         # ← 無敵状態フラグ
         self.invincible_timer = 0       # ← 無敵タイマー（フレーム数）
+        self.facing_left = False        # ← 左右反転状態を記録する変数
 
-        super().__init__(Player_IMG_PATH, POSITION_START, sprite_manager, SPEED_PLAYER, MAXHP_PLAYER)
+        super().__init__(Player_IMG_PATH, POSITION_START, all_sprites, enemy_projectiles, SPEED_PLAYER, MAXHP_PLAYER)
         
 
     def move(self):
@@ -58,10 +60,18 @@ class Player(Character):
 
         self.move()
         self.image = pygame.transform.rotate(self.original_image, self.angle)
-         # ← 左に向いてるときだけ左右反転
+        # 左右反転状態を記録
         if self.direction.x < 0:
+            self.facing_left = True
+        elif self.direction.x > 0:
+            self.facing_left = False
+
+        if self.facing_left:
             self.image = pygame.transform.flip(self.image, True, False)
-            self.mask = pygame.mask.from_surface(self.image)  # ← 画像変更後に再生成
+        else:
+            self.image = self.image.copy()
+
+        self.mask = pygame.mask.from_surface(self.image)  # ← 画像変更後に再生成
 
         self.rect = self.image.get_rect(center=self.rect.center)
         #座標を出力
@@ -73,7 +83,10 @@ class Player(Character):
     @property
     def shoot_direction(self):
         angle_rad = math.radians(self.angle)
-        return pygame.math.Vector2(math.cos(angle_rad), math.sin(angle_rad))
+        direction = pygame.math.Vector2(math.cos(angle_rad), math.sin(angle_rad))
+        if self.facing_left:
+            direction *= -1  # 左向きなら逆方向に発射
+        return direction
 
     def set_bullets(self):
         bullet_type = ProjectileType.BulletLinerly(
@@ -81,6 +94,7 @@ class Player(Character):
             lambda: self.shoot_direction,
             self.screen
         )
+        #self.weapon = Weapon(self.all)  # ← bullets_group を渡す
         self.weapon.resister_bullet(bullet_type)
 
     def trigger_invincibility(self, duration_frames=60):

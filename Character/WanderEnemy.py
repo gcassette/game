@@ -6,9 +6,9 @@ from Character.Character import Character
 IMG_WEnemy = 'assets//enemy_coffee.png'
 
 class WanderEnemy(Character):
-    def __init__(self, screen, projectiles_manager):
+    def __init__(self, screen, all_sprites, enemy_projectiles):
         self.screen = screen
-        super().__init__(IMG_WEnemy, (random.randint(100, 700), random.randint(100, 500)), projectiles_manager, speed=0.5, max_hp=2)
+        super().__init__(IMG_WEnemy, (random.randint(100, 700), random.randint(100, 500)),  all_sprites, enemy_projectiles, speed=0.5, max_hp=2)
         
         self.phase = "wander"
         self.wait_counter = 0
@@ -73,9 +73,10 @@ class WanderEnemy(Character):
 
         self.fireball_timer += 1
         if self.fireball_timer >= self.fireball_interval:
-            #shoot_direction = pygame.math.Vector2(-1, 0) if self.facing_left else pygame.math.Vector2(1, 0)
-            #print("shoot_direction:", shoot_direction)
-            fireball = ProjectileType.Fireball(lambda: self.rect.center, lambda: pygame.math.Vector2(1, 0) if self.facing_left else pygame.math.Vector2(-1, 0),self.screen)
-            self.weapon.resister_bullet(fireball)
-            self.weapon.shoot()
+
+            fireball = ProjectileType.Fireball(lambda: self.rect.center, lambda:pygame.math.Vector2(1, 0) if self.facing_left else pygame.math.Vector2(-1, 0), self.screen)
+            fireball.drawing_shoot()
+            self.weapon.projectiles_group.add(fireball)  # 武器のプロジェクタイルグループに追加
+            self.weapon.all_sprites.add(fireball)
+
             self.fireball_timer = 0

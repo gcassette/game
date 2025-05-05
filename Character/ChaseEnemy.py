@@ -6,7 +6,7 @@ import Weapon.ProjectileType as ProjectileType
 IMG_CEnemy = 'assets//enemy_sake.png'
 
 class ChaseEnemy(Character):
-    def __init__(self, screen, projectile_manager, get_player_pos, update_interval=2400):
+    def __init__(self, screen, all_sprites, enemy_projectiles, get_player_pos, update_interval=2400):
         """
         player_pos_getter: プレイヤー位置を返す関数またはlambda
         update_interval: 方向を更新する間隔（フレーム数）。1なら毎フレーム更新。
@@ -20,7 +20,7 @@ class ChaseEnemy(Character):
 
         # 初期位置はランダム
         start_pos = (random.randint(100, 700), random.randint(100, 500))
-        super().__init__(IMG_CEnemy, start_pos, projectile_manager, speed=0.5, max_hp=3)
+        super().__init__(IMG_CEnemy, start_pos, all_sprites, enemy_projectiles, speed=0.5, max_hp=3)
 
     def set_bullets(self):
         # 例：近づく敵なので攻撃しない、または後で火の玉追加可

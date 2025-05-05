@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from Weapon import Weapon
 
 class Character(pygame.sprite.Sprite, ABC):
-    def __init__(self, image_path, start_pos, sprite_manager, speed=1, max_hp=1):
+    def __init__(self, image_path, start_pos, all_sprites, projectiles_group, speed=1, max_hp=1):
         super().__init__()
         self.original_image = pygame.image.load(image_path).convert_alpha()
         self.image = self.original_image.copy()
@@ -20,7 +20,7 @@ class Character(pygame.sprite.Sprite, ABC):
         self.hp = max_hp
 
         #武器の装備
-        self.weapon = Weapon(sprite_manager)
+        self.weapon = Weapon(all_sprites, projectiles_group)
         self.set_bullets()
 
     @abstractmethod
