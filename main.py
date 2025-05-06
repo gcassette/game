@@ -9,6 +9,24 @@ from Life import Life
 from Background import Background
 import SpriteGroups.EnemyProjectile
 
+def generate_enemies(chase_enemy_num, linear_enemy_num, wander_enemy_num, bb_enemy_num):
+    if chase_enemy_num:
+        for i in range(chase_enemy_num):
+            chase_enemy[i] = ChaseEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos, update_interval=120)
+            enemies.add(chase_enemy[i])
+    if chase_enemy_num:
+        for i in range(linear_enemy_num):
+            linear_enemy[i] = LinearEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos)
+            enemies.add(linear_enemy[i])
+    if wander_enemy_num:
+        for i in range(wander_enemy_num):
+            wander_enemy[i] = WanderEnemy(screen, all_sprites, enemy_projectiles)
+            enemies.add(wander_enemy[i])
+    if bb_enemy_num:
+        for i in range(bb_enemy_num):
+            bb_enemy[i] = BBEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos, update_interval=10)
+            enemies.add(bb_enemy[i])
+
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 585
 screen_rect = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT) 
@@ -30,6 +48,10 @@ damage_sound = pygame.mixer.Sound("assets/レトロアクション_3.mp3")
 damage_sound.set_volume(0.05)
 enemy_damage_sound = pygame.mixer.Sound("assets/ショット命中.mp3")
 enemy_damage_sound.set_volume(0.05)
+wander_enemy = []
+chase_enemy = []
+linear_enemy = []
+bb_enemy = []
 
 clock = pygame.time.Clock()
 
@@ -64,10 +86,39 @@ while running:
                     state = 'level_init'
 
     if state == 'playing':
-        all_sprites.update()
-        background.update()
-        background.draw(screen)
-        all_sprites.draw(screen)
+
+        # レベル構成
+        if wave_init:
+            if wave == 1:
+                generate_enemies(1,0,0,0)
+            elif wave == 2:
+                generate_enemies(1,0,0,0)
+            elif wave == 3:       
+                generate_enemies(5,0,0,0)
+            elif wave == 4:
+                generate_enemies(1,1,0,0)
+            elif wave == 5:
+                generate_enemies(2,3,0,0)
+            elif wave == 6:
+                generate_enemies(1,1,1,0)
+            elif wave == 7:
+                generate_enemies(1,2,3,0)
+            elif wave == 8:
+                generate_enemies(3,2,3,0)
+            elif wave == 9:
+                generate_enemies(3,3,3,1)
+            else:
+                state = 'game_clear_init'
+
+            all_sprites.add(enemies)
+            print('wave' + str(wave))
+            wave_init = False
+
+        else:
+            if not enemies:
+                wave += 1
+                wave_init = True
+
 
         #direction_text = font.render(f"Angle: {player.angle:.2f}", True, (255, 255, 0))
         #screen.blit(direction_text, (10, 30))
@@ -122,6 +173,25 @@ while running:
 
         player_life.draw(screen)
 
+    elif state == 'game_clear_init':
+        GAME_CLEAR = pygame.image.load('assets/GAME_CLEAR.png').convert()
+        title_button = pygame.image.load('assets/title_button.png').convert()
+        title_button_hover = pygame.image.load('assets/title_button_hover.png').convert()
+        title_button_rect = play_button.get_rect(center=(402, 530))
+        state = 'game_clear'
+
+    elif state == 'game_clear':
+        screen.blit(GAME_CLEAR, (0,0))
+        # play button
+        mouse_pos = pygame.mouse.get_pos()
+        mouse_click = pygame.mouse.get_pressed()
+        if title_button_rect.collidepoint(mouse_pos):
+            screen.blit(title_button_hover, title_button_rect)
+            if mouse_click[0]:  # Left-click
+                state = 'title_init'
+        else:
+            screen.blit(title_button, title_button_rect)
+
     elif state == 'game_over_init':
         GAME_OVER = pygame.image.load('assets/GAME_OVER.png').convert()
         title_button = pygame.image.load('assets/title_button.png').convert()
@@ -167,9 +237,6 @@ while running:
                 state = 'story_init'
         else:
             screen.blit(story_button, story_button_rect)
-
-
-
 
     elif state == 'title_init': # initialize title screen
         bg_title = pygame.image.load('assets/bg_title.png').convert()
@@ -225,7 +292,6 @@ while running:
             else:
                 screen.blit(play_button, play_button_rect)
 
-
         if not scene == 'scene4':
             mouse_pos = pygame.mouse.get_pos()
             mouse_click = pygame.mouse.get_pressed()
@@ -236,37 +302,27 @@ while running:
 
 
     elif state == 'level_init': # initialize game screen
-
-
-
         all_sprites = pygame.sprite.Group()
-        sprite_enemies = pygame.sprite.Group()
         bullets = pygame.sprite.Group()
         enemy_projectiles = pygame.sprite.Group()
 
         player = Player(screen, all_sprites, bullets)
         #enemy = Enemy(screen, all_sprites, enemy_projectiles)
-        wander_enemy = WanderEnemy(screen, all_sprites, enemy_projectiles)
-        chase_enemy = ChaseEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos, update_interval=120)
-        linear_enemy = LinearEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos)
-        bb_enemy = BBEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos, update_interval=10)
+        for i in range(10):
+            wander_enemy.append(WanderEnemy(screen, all_sprites, enemy_projectiles))
+            chase_enemy.append(ChaseEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos, update_interval=120))
+            linear_enemy.append(LinearEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos))
+            bb_enemy.append(BBEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos, update_interval=10))
         # 敵のグループを作成
         enemies = pygame.sprite.Group()
 
-
+        # enemies.add(wander_enemy, chase_enemy)  # ← ここ追加
+        # enemies.add(linear_enemy)  # ← ここ追加
+        # enemies.add(bb_enemy)
+        # enemies.add(chase_enemy)
 
         all_sprites.add(player)
-        #all_sprites.add(enemy)
-        all_sprites.add(wander_enemy)
-        all_sprites.add(chase_enemy)
-        all_sprites.add(linear_enemy)
-        all_sprites.add(bb_enemy)  # ← これを忘れている
-
-        enemies.add(wander_enemy, chase_enemy)  # ← ここ追加
-        enemies.add(linear_enemy)  # ← ここ追加
-        enemies.add(bb_enemy)
-
-        all_sprites.add(sprite_enemies)
+        all_sprites.add(enemies)
         all_sprites.add(bullets)
         all_sprites.add(enemy_projectiles)
 
@@ -276,6 +332,8 @@ while running:
         level_start_time = pygame.time.get_ticks() // 1000  #define the level time started
 
         state = 'playing'
+        wave = 1
+        wave_init = True
 
     elif state == 'pause_init':
         paused = pygame.image.load('assets/paused.png').convert()

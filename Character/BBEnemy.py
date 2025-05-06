@@ -75,7 +75,7 @@ class BBEnemy(Character):
 
 
     # 評価関数（前述の修正版）
-    def f_modified(self,x, y, px, py, dx, dy, sigma=1.0, t=1.0):
+    def f_modified(self,x, y, px, py, dx, dy, sigma=1.0, t=0.5):
         rx = x - px
         ry = y - py
         r_len = math.sqrt(rx**2 + ry**2)
