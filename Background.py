@@ -1,8 +1,8 @@
 import pygame
 
 class Background:
-    def __init__(self, screen_width, screen_height, scroll_speed=1):
-        self.image = pygame.image.load('assets//bg1.png').convert()
+    def __init__(self, screen_width, screen_height, scroll_speed=1, image='assets//bg1.png'):
+        self.image = pygame.image.load(image).convert()
         # self.image = pygame.transform.scale(self.image, (screen_width, screen_height))
         self.width = self.image.get_width()
         self.scroll_x = 0

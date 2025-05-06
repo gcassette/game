@@ -35,7 +35,7 @@ TIME_LIMIT = 300
 # Initialization
 pygame.init()
 font = pygame.font.SysFont(None, 36)
-japanese_font = pygame.font.Font('assets/BestTen-DOT.otf', 50)
+japanese_font = pygame.font.Font('assets/BestTen-DOT.otf', 25)
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 icon = pygame.image.load("assets/calcium_icon.png").convert_alpha()
 pygame.display.set_icon(icon)
@@ -106,7 +106,9 @@ while running:
             elif wave == 8:
                 generate_enemies(3,2,3,0)
             elif wave == 9:
-                generate_enemies(3,3,3,1)
+                generate_enemies(0,0,0,1)
+                boss_flag = True
+                background = Background(SCREEN_WIDTH, SCREEN_WIDTH, scroll_speed=1, image='assets/gachigire_castle.png')
             else:
                 state = 'game_clear_init'
 
@@ -141,9 +143,6 @@ while running:
                 if isinstance(collided_enemy, ChaseEnemy):
                     collided_enemy.trigger_cooldown(frames=120)
 
-
-
-
         # Player と Fireball の当たり判定
         
         if collided_fireballs := pygame.sprite.spritecollide(player, enemy_projectiles, True, collided=pygame.sprite.collide_mask):
@@ -157,8 +156,12 @@ while running:
                 enemy.take_damage()
                 enemy_damage_sound.play()
                 print(f"Enemy {enemy} hit by bullet!")
+                if enemy in bb_enemy: #ボスの残機管理
+                    boss_life.lose_life()
                 if enemy.hp <= 0:
                     enemy.kill()
+
+
 
         # ライフが0になったらゲーム終了
         if player_life.current_lives <= 0:
@@ -173,6 +176,10 @@ while running:
         screen.blit(timer_text, (650, 10))
 
         player_life.draw(screen)
+        if boss_flag:
+            boss_life.draw(screen)
+            boss_life_caption = japanese_font.render('BOSS LIFE', True, (255, 255, 255))
+            screen.blit(boss_life_caption, (390,430))
 
     elif state == 'game_clear_init':
         GAME_CLEAR = pygame.image.load('assets/GAME_CLEAR.png').convert()
@@ -328,6 +335,7 @@ while running:
         all_sprites.add(enemy_projectiles)
 
         player_life = Life(max_lives=5)
+        boss_life = Life(max_lives=30, position=(390,460), image='assets/heart_blue.png')
         background = Background(SCREEN_WIDTH, SCREEN_WIDTH, scroll_speed=1)
 
         level_start_time = pygame.time.get_ticks() // 1000  #define the level time started
@@ -335,6 +343,7 @@ while running:
         state = 'playing'
         wave = 1
         wave_init = True
+        boss_flag = False
 
     elif state == 'pause_init':
         paused = pygame.image.load('assets/paused.png').convert()
