@@ -369,7 +369,7 @@ while running:
         all_sprites.add(enemy_projectiles)
         all_sprites.add(heals)
 
-        player_life = Life(max_lives=30)
+        player_life = Life(max_lives=5)
         boss_life = Life(max_lives=30, position=(390,460), image='assets/heart_blue.png')
         background = Background(SCREEN_WIDTH, SCREEN_WIDTH, scroll_speed=1)
 
