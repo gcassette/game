@@ -5,6 +5,7 @@ from Character.WanderEnemy import WanderEnemy
 from Character.ChaseEnemy import ChaseEnemy
 from Character.LinearEnemy import LinearEnemy
 from Character.BossEnemy import BossEnemy
+from Character.TankEnemy import Tank
 from Life import Life
 from Background import Background
 import SpriteGroups.EnemyProjectile
@@ -48,10 +49,6 @@ damage_sound = pygame.mixer.Sound("assets/レトロアクション_3.mp3")
 damage_sound.set_volume(0.05)
 enemy_damage_sound = pygame.mixer.Sound("assets/ショット命中.mp3")
 enemy_damage_sound.set_volume(0.05)
-wander_enemy = []
-chase_enemy = []
-linear_enemy = []
-bb_enemy = []
 
 clock = pygame.time.Clock()
 
@@ -90,7 +87,7 @@ while running:
         # レベル構成
         if wave_init:
             if wave == 1:
-                generate_enemies(1,0,0,1)
+                generate_enemies(1,0,0,0)
             elif wave == 2:
                 generate_enemies(1,0,0,0)
             elif wave == 3:       
@@ -107,6 +104,7 @@ while running:
                 generate_enemies(3,2,3,0)
             elif wave == 9:
                 generate_enemies(0,0,0,1)
+                boss_start_time = pygame.time.get_ticks() // 1000
                 boss_flag = True
                 background = Background(SCREEN_WIDTH, SCREEN_WIDTH, scroll_speed=1, image='assets/gachigire_castle.png')
             else:
@@ -158,6 +156,12 @@ while running:
                 print(f"Enemy {enemy} hit by bullet!")
                 if enemy in bb_enemy: #ボスの残機管理
                     boss_life.lose_life()
+                    if boss_life.current_lives > 19:
+                        i = 30 - boss_life.current_lives - 1
+                        tank_enemy.append(Tank(screen, all_sprites, tanks, start_pos=(50, 50 + i*60)))
+                        tanks.add(tank_enemy[i])
+                        all_sprites.add(tanks)
+
                 if enemy.hp <= 0:
                     enemy.kill()
 
@@ -180,6 +184,8 @@ while running:
             boss_life.draw(screen)
             boss_life_caption = japanese_font.render('BOSS LIFE', True, (255, 255, 255))
             screen.blit(boss_life_caption, (390,430))
+            print('tanks drawn')
+            tanks.draw(screen)
 
     elif state == 'game_clear_init':
         GAME_CLEAR = pygame.image.load('assets/GAME_CLEAR.png').convert()
@@ -313,14 +319,21 @@ while running:
         all_sprites = pygame.sprite.Group()
         bullets = pygame.sprite.Group()
         enemy_projectiles = pygame.sprite.Group()
+        tanks = pygame.sprite.Group()
 
         player = Player(screen, all_sprites, bullets)
         #enemy = Enemy(screen, all_sprites, enemy_projectiles)
+        wander_enemy = []
+        chase_enemy = []
+        linear_enemy = []
+        bb_enemy = []
+        tank_enemy = []
         for i in range(10):
             wander_enemy.append(WanderEnemy(screen, all_sprites, enemy_projectiles))
             chase_enemy.append(ChaseEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos, update_interval=120))
             linear_enemy.append(LinearEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos))
             bb_enemy.append(BossEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos))
+            # tank_enemy.append(Tank(screen, all_sprites, tanks))
         # 敵のグループを作成
         enemies = pygame.sprite.Group()
 
@@ -334,7 +347,7 @@ while running:
         all_sprites.add(bullets)
         all_sprites.add(enemy_projectiles)
 
-        player_life = Life(max_lives=5)
+        player_life = Life(max_lives=30)
         boss_life = Life(max_lives=30, position=(390,460), image='assets/heart_blue.png')
         background = Background(SCREEN_WIDTH, SCREEN_WIDTH, scroll_speed=1)
 
@@ -344,6 +357,7 @@ while running:
         wave = 1
         wave_init = True
         boss_flag = False
+        boss_start_time = 0
 
     elif state == 'pause_init':
         paused = pygame.image.load('assets/paused.png').convert()
