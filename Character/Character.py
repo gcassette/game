@@ -36,6 +36,11 @@ class Character(pygame.sprite.Sprite, ABC):
         self.pos += self.direction * self.speed
         self.rect.center = (round(self.pos.x), round(self.pos.y))
 
+         # === 画面外に出たら自動で消滅 ===
+        screen_rect = pygame.display.get_surface().get_rect()
+        if not screen_rect.colliderect(self.rect):
+            self.kill()
+
     def take_damage(self, damage=1):
         self.hp -= damage
         if self.hp <= 0:
