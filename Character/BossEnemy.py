@@ -25,6 +25,9 @@ class BossEnemy(Character):
         self.shoot_timer = 0
         self.shoot_interval = 90  # ホーミング弾を1.5秒ごとに撃つ
 
+        self.shoot_timer2 = 0
+        self.shoot_interval2 = 150  # 直進弾の発射間隔（調整可）
+
         mask_surface = pygame.Surface(self.image.get_size(), pygame.SRCALPHA)
         pygame.draw.circle(mask_surface, (255, 255, 255), self.image.get_rect().center, 30)
         self.mask = pygame.mask.from_surface(mask_surface)
@@ -49,6 +52,13 @@ class BossEnemy(Character):
             self.shoot_timer = 0
             self.fire_homing()
 
+        # 直進弾は HP が半分以下のときのみ使用
+        if self.hp <= self.max_hp / 2:
+            self.shoot_timer2 += 1
+            if self.shoot_timer2 >= self.shoot_interval2:
+                self.shoot_timer2 = 0
+                self.fire_straight()
+
     def fire_homing(self):
         bullet_pos = self.pos.xy
         direction_to_player = (self.get_player_pos() - self.pos).normalize()
@@ -62,6 +72,19 @@ class BossEnemy(Character):
         homing.drawing_shoot()
         self.weapon.projectiles_group.add(homing)
         self.weapon.all_sprites.add(homing)
+
+    def fire_straight(self):
+        bullet_pos = self.pos.xy
+        direction = (self.get_player_pos() - self.pos).normalize()
+
+        straight = StraightFireball(
+            lambda: pygame.math.Vector2(bullet_pos),
+            lambda: direction,
+            self.screen
+        )
+        straight.drawing_shoot()
+        self.weapon.projectiles_group.add(straight)
+        self.weapon.all_sprites.add(straight)
 
 
 
@@ -126,7 +149,7 @@ class HomingFireball(Projectile):
 
             print(f"[DEBUG] cosθ: {cos_theta:.3f}, Player→Bullet dist: {distance:.2f}, BulletPos: {self.pos}, PlayerPos: {player_pos}")
 
-            if cos_theta < -0.7:
+            if cos_theta < -0.8:
                 self.has_avoided = True
                 self.avoid_direction = (player_pos - self.pos).normalize()
                 print("[DEBUG] 回り込み成功 -> 突進モード移行")
@@ -188,5 +211,46 @@ class HomingFireball(Projectile):
             return forward_dir.normalize()
         else:
             return grad.normalize()
+        
+
+
+class StraightFireball(Projectile):
+    SIZE = (12, 12)
+    COLOR = (255, 255, 0)  # 黄色
+    SPRITE_COORDINATE = (6, 6)
+    SPRITE_RADIUS = 6
+
+    def __init__(self, get_position_func, shoot_direction, screen,speed = 2.5):
+        super().__init__("StraightFire", get_position_func, shoot_direction, screen)
+        self.SPEED = speed
+        self.pos = pygame.math.Vector2(0, 0)
+        self.velocity = pygame.math.Vector2(0, 0)
+
+    def create_image(self) -> pygame.Surface:
+        image = pygame.Surface(self.SIZE, pygame.SRCALPHA)
+        pygame.draw.circle(image, self.COLOR, self.SPRITE_COORDINATE, self.SPRITE_RADIUS)
+        return image
+
+    def clone(self) -> Projectile:
+        return StraightFireball(self.get_position, self.shoot_direction, self.screen)
+
+    def drawing_shoot(self):
+        self.enable = True
+        self.pos = self.get_position()
+        self.image = self.create_image()
+        self.rect = self.image.get_rect(center=self.pos)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.velocity = self.shoot_direction().normalize() * self.SPEED
+        self.beam_sound.play()
+
+    def update(self):
+        if not self.enable:
+            return
+
+        self.pos += self.velocity
+        self.rect.center = (round(self.pos.x), round(self.pos.y))
+        if not self.screen.get_rect().colliderect(self.rect):
+            self.kill()
+
 
 
