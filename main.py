@@ -24,7 +24,7 @@ def generate_enemies(chase_enemy_num, linear_enemy_num, wander_enemy_num, bb_ene
             enemies.add(wander_enemy[i])
     if bb_enemy_num:
         for i in range(bb_enemy_num):
-            bb_enemy[i] = BBEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos, update_interval=10)
+            bb_enemy[i] = BossEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos)
             enemies.add(bb_enemy[i])
 
 
@@ -312,7 +312,7 @@ while running:
             wander_enemy.append(WanderEnemy(screen, all_sprites, enemy_projectiles))
             chase_enemy.append(ChaseEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos, update_interval=120))
             linear_enemy.append(LinearEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos))
-            bb_enemy.append(BBEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos, update_interval=10))
+            bb_enemy.append(BossEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos))
         # 敵のグループを作成
         enemies = pygame.sprite.Group()
 
