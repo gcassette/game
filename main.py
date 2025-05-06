@@ -21,7 +21,7 @@ def generate_enemies(chase_enemy_num, linear_enemy_num, wander_enemy_num, bb_ene
             enemies.add(linear_enemy[i])
     if wander_enemy_num:
         for i in range(wander_enemy_num):
-            wander_enemy[i] = WanderEnemy(screen, all_sprites, enemy_projectiles)
+            wander_enemy[i] = WanderEnemy(screen, all_sprites, enemy_projectiles,lambda: player.pos)
             enemies.add(wander_enemy[i])
     if bb_enemy_num:
         for i in range(bb_enemy_num):
@@ -140,6 +140,15 @@ while running:
                 print(f"[DEBUG] Player pos: {player.pos}, Collided with {type(collided_enemy).__name__} at {collided_enemy.pos}")
                 if isinstance(collided_enemy, ChaseEnemy):
                     collided_enemy.trigger_cooldown(frames=120)
+
+        # --- プレイヤーと戦車の衝突判定 ---
+        if collided_tanks := pygame.sprite.spritecollide(player, tanks, False, collided=pygame.sprite.collide_mask):
+            if not player.invincible:
+                player_life.lose_life()
+                damage_sound.play()
+                player.trigger_invincibility(duration_frames=300)
+                print("Player hit by tank!")
+
 
         # Player と Fireball の当たり判定
         
@@ -329,7 +338,7 @@ while running:
         bb_enemy = []
         tank_enemy = []
         for i in range(10):
-            wander_enemy.append(WanderEnemy(screen, all_sprites, enemy_projectiles))
+            wander_enemy.append(WanderEnemy(screen, all_sprites, enemy_projectiles,lambda: player.pos))
             chase_enemy.append(ChaseEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos, update_interval=120))
             linear_enemy.append(LinearEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos))
             bb_enemy.append(BossEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos))

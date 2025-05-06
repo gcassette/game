@@ -20,7 +20,7 @@ class ChaseEnemy(Character):
 
         # 初期位置はランダム
         start_pos = (random.randint(100, 700), random.randint(100, 500))
-        super().__init__(IMG_CEnemy, start_pos, all_sprites, enemy_projectiles, speed=0.5, max_hp=3)
+        super().__init__(IMG_CEnemy, start_pos, all_sprites, enemy_projectiles, speed=1.5, max_hp=3)
 
     def set_bullets(self):
         # 例：近づく敵なので攻撃しない、または後で火の玉追加可
