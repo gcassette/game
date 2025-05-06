@@ -222,7 +222,7 @@ class StraightFireball(Projectile):
     SPRITE_COORDINATE = (6, 6)
     SPRITE_RADIUS = 6
 
-    def __init__(self, get_position_func, shoot_direction, screen,speed = 2.5):
+    def __init__(self, get_position_func, shoot_direction, screen,speed = 5.0):
         super().__init__("StraightFire", get_position_func, shoot_direction, screen)
         self.SPEED = speed
         self.pos = pygame.math.Vector2(0, 0)
