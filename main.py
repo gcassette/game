@@ -4,7 +4,7 @@ from Character.Enemy import Enemy
 from Character.WanderEnemy import WanderEnemy
 from Character.ChaseEnemy import ChaseEnemy
 from Character.LinearEnemy import LinearEnemy
-from Character.BBEnemy import BBEnemy
+from Character.BossEnemy import BossEnemy
 from Life import Life
 from Background import Background
 import SpriteGroups.EnemyProjectile
@@ -249,7 +249,7 @@ while running:
         wander_enemy = WanderEnemy(screen, all_sprites, enemy_projectiles)
         chase_enemy = ChaseEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos, update_interval=120)
         linear_enemy = LinearEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos)
-        bb_enemy = BBEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos, update_interval=10)
+        bossenemy = BossEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos)
         # 敵のグループを作成
         enemies = pygame.sprite.Group()
 
@@ -257,14 +257,14 @@ while running:
 
         all_sprites.add(player)
         #all_sprites.add(enemy)
-        all_sprites.add(wander_enemy)
-        all_sprites.add(chase_enemy)
-        all_sprites.add(linear_enemy)
-        all_sprites.add(bb_enemy)  # ← これを忘れている
+        #all_sprites.add(wander_enemy)
+        #all_sprites.add(chase_enemy)
+        #all_sprites.add(linear_enemy)
+        all_sprites.add(bossenemy)  # ← これを忘れている
 
         enemies.add(wander_enemy, chase_enemy)  # ← ここ追加
         enemies.add(linear_enemy)  # ← ここ追加
-        enemies.add(bb_enemy)
+        enemies.add(bossenemy)
 
         all_sprites.add(sprite_enemies)
         all_sprites.add(bullets)
