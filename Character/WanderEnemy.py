@@ -6,9 +6,9 @@ from Character.Character import Character
 IMG_WEnemy = 'assets//enemy_coffee.png'
 
 class WanderEnemy(Character):
-    def __init__(self, screen, all_sprites, enemy_projectiles):
+    def __init__(self, screen, all_sprites, enemy_projectiles,get_player_pos):
         self.screen = screen
-        super().__init__(IMG_WEnemy, (random.randint(100, 700), random.randint(100, 500)),  all_sprites, enemy_projectiles, speed=0.5, max_hp=2)
+        super().__init__(IMG_WEnemy, (random.randint(100, 700), random.randint(100, 500)),  all_sprites, enemy_projectiles, speed=1.0, max_hp=2)
         
         self.phase = "wander"
         self.wait_counter = 0
@@ -19,6 +19,7 @@ class WanderEnemy(Character):
         self.fireball_timer = 0
         self.fireball_interval = 90  # 1.5秒ごと（FPS=60前提）
         self.facing_left = False  # 左右反転状態を記録する変数
+        self.get_player_pos = get_player_pos
 
     def set_random_direction(self):
         directions = [
@@ -29,17 +30,6 @@ class WanderEnemy(Character):
         ]
 
         self.direction = random.choice(directions) * self.speed
-
-        # 左右反転状態を記録
-        if self.direction.x < 0:
-            self.image = pygame.transform.flip(self.original_image, True, False)
-            self.mask = pygame.mask.from_surface(self.image)  # ← 画像変更後に再生成
-            self.facing_left = True
-        elif self.direction.x > 0:
-            self.image = self.original_image.copy()
-            self.mask = pygame.mask.from_surface(self.image)  # ← 画像変更後に再生成
-            self.facing_left = False
-        # 上下（x == 0）の場合は向きそのまま
         self.rect = self.image.get_rect(center=self.rect.center)
 
     def set_bullets(self):
@@ -73,8 +63,20 @@ class WanderEnemy(Character):
 
         self.fireball_timer += 1
         if self.fireball_timer >= self.fireball_interval:
+            direction_func = lambda: (self.get_player_pos() - pygame.math.Vector2(self.rect.center)).normalize()
+            # fireball = ProjectileType.Fireball(
+            #     lambda: self.rect.center,
+            #     direction_func,
+            #     self.screen
+            # )
 
-            fireball = ProjectileType.Fireball(lambda: self.rect.center, lambda:pygame.math.Vector2(1, 0) if self.facing_left else pygame.math.Vector2(-1, 0), self.screen)
+            fireball = ProjectileType.Fireball(
+                lambda: self.rect.center,
+                direction_func,
+                self.screen
+            )
+
+            # fireball = ProjectileType.Fireball(lambda: self.rect.center, lambda:pygame.math.Vector2(1, 0) if self.facing_left else pygame.math.Vector2(-1, 0), self.screen)
             fireball.drawing_shoot()
             self.weapon.projectiles_group.add(fireball)  # 武器のプロジェクタイルグループに追加
             self.weapon.all_sprites.add(fireball)
