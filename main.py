@@ -169,7 +169,7 @@ while running:
                     boss_life.lose_life()
                     if boss_life.current_lives > 19:
                         i = 30 - boss_life.current_lives - 1
-                        tank_enemy.append(Tank(screen, all_sprites, tanks, start_pos=(50, 50 + i*60)))
+                        tank_enemy.append(Tank(screen, all_sprites, tanks, start_pos=(0, 50 + i*60)))
                         tanks.add(tank_enemy[i])
                         all_sprites.add(tanks)
 
