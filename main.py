@@ -4,6 +4,7 @@ from Character.Enemy import Enemy
 from Character.WanderEnemy import WanderEnemy
 from Character.ChaseEnemy import ChaseEnemy
 from Character.LinearEnemy import LinearEnemy
+from Character.BBEnemy import BBEnemy
 from Life import Life
 from Background import Background
 import SpriteGroups.EnemyProjectile
@@ -92,13 +93,13 @@ while running:
 
 
         # Player と Fireball の当たり判定
-        print("enemy_projectiles:", enemy_projectiles)
+        
         if collided_fireballs := pygame.sprite.spritecollide(player, enemy_projectiles, True, collided=pygame.sprite.collide_mask):
             player_life.lose_life()
             damage_sound.play()
         # 全ての敵と bullets の当たり判定
         for enemy in enemies:
-            print("bullets:", bullets)
+            
             collided_bullets = pygame.sprite.spritecollide(enemy, bullets, True, collided=pygame.sprite.collide_mask)
             if collided_bullets:
                 enemy.take_damage()
@@ -248,6 +249,7 @@ while running:
         wander_enemy = WanderEnemy(screen, all_sprites, enemy_projectiles)
         chase_enemy = ChaseEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos, update_interval=120)
         linear_enemy = LinearEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos)
+        bb_enemy = BBEnemy(screen, all_sprites, enemy_projectiles, lambda: player.pos, update_interval=10)
         # 敵のグループを作成
         enemies = pygame.sprite.Group()
 
@@ -258,8 +260,11 @@ while running:
         all_sprites.add(wander_enemy)
         all_sprites.add(chase_enemy)
         all_sprites.add(linear_enemy)
+        all_sprites.add(bb_enemy)  # ← これを忘れている
+
         enemies.add(wander_enemy, chase_enemy)  # ← ここ追加
         enemies.add(linear_enemy)  # ← ここ追加
+        enemies.add(bb_enemy)
 
         all_sprites.add(sprite_enemies)
         all_sprites.add(bullets)
