@@ -4,7 +4,7 @@ from Character.Enemy import Enemy
 from Character.WanderEnemy import WanderEnemy
 from Character.ChaseEnemy import ChaseEnemy
 from Character.LinearEnemy import LinearEnemy
-from Character.BBEnemy import BBEnemy
+from Character.BossEnemy import BossEnemy
 from Life import Life
 from Background import Background
 import SpriteGroups.EnemyProjectile

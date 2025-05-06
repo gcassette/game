@@ -19,6 +19,7 @@ class BBEnemy(Character):
         self.update_counter = 0
         self.cooldown_timer = 0  # ← クールダウン用のフレームカウント
         self.is_on_cooldown = False  # ← クールダウン中かどうかのフラグ
+        self.last_print_time = 0  # ← 最後に出力した時刻（ミリ秒）
 
         # 初期位置はランダム
         start_pos = (random.randint(100, 700), random.randint(100, 500))
@@ -51,12 +52,17 @@ class BBEnemy(Character):
                 py=target_pos.y,
                 dx=1.0, dy=0.0,        # ターゲットの正面方向（ここでは右向き仮定）
                 sigma=200.5,
-                t=2.0,
+                t=1.0,
                 step=step             # 1回の移動評価ステップサイズ（ピクセル）
             )
             self.direction = pygame.math.Vector2(move_dx, move_dy)
             self.update_counter = 0
-            print("move_dx,move_dy",move_dx, "  ",move_dy)
+            
+             # ★ 0.5秒ごとに出力（＝500ms）
+            now = pygame.time.get_ticks()
+            if now - self.last_print_time >= 500:
+                print("move_dx,move_dy", move_dx, "  ", move_dy)
+                self.last_print_time = now  # 次回用に記録
 
         self.move()
         
@@ -78,16 +84,19 @@ class BBEnemy(Character):
     def f_modified(self,x, y, px, py, dx, dy, sigma=1.0, t=0.5):
         rx = x - px
         ry = y - py
-        r_len = math.sqrt(rx**2 + ry**2)
+        r_len = math.hypot(rx, ry)
         w = math.exp(-r_len**2 / (sigma**2))
 
-        d_len = math.sqrt(dx**2 + dy**2)
+        d_len = math.hypot(dx, dy)
         dot = rx * dx + ry * dy
         cos_theta = dot / (r_len * d_len + 1e-8)
 
-        b = 1 - t * cos_theta
-        print("w:",w,"b:",b)
+        # 背後（cosθ ≈ -1）を最大評価とするガウス型角度評価
+        b = math.exp(-((cos_theta + 1)**2) / (2 * 0.4**2))  # μ = -1, σ = 0.4
+
         return w * b
+
+
 
     # 移動方向決定
     def choose_move_direction(self,x, y, px, py, dx, dy, sigma=10.0, t=1.0, step=0.1):
@@ -104,7 +113,8 @@ class BBEnemy(Character):
             nx = x + dx_step * step
             ny = y + dy_step * step
             val = self.f_modified(nx, ny, px, py, dx, dy, sigma, t)
-            print("dx:",dx_step,"dy:",dy_step,"bestf - val:",best_f - val,"step:",step)
+            # if now - self.last_print_time >= 500:
+            #     print("dx:",dx_step,"dy:",dy_step,"bestf - val:",best_f - val,"step:",step)
             if val > best_f:
                 best_f = val
                 best_dir = (dx_step, dy_step)
