@@ -23,3 +23,10 @@ class Life(pygame.sprite.Sprite):
             x = self.position[0] + i * self.spacing - (i // 10) * self.spacing * 10
             y = self.position[1] + (i // 10) * self.spacing
             surface.blit(self.image, (x, y))
+
+
+class Heal(pygame.sprite.Sprite):
+    def __init__(self, pos):
+        super().__init__()
+        self.image = pygame.image.load('assets/heart_green.png').convert_alpha()
+        self.rect = self.image.get_rect(center=pos)

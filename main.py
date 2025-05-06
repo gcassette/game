@@ -7,8 +7,10 @@ from Character.LinearEnemy import LinearEnemy
 from Character.BossEnemy import BossEnemy
 from Character.TankEnemy import Tank
 from Life import Life
+from Life import Heal
 from Background import Background
 import SpriteGroups.EnemyProjectile
+import random
 
 def generate_enemies(chase_enemy_num, linear_enemy_num, wander_enemy_num, bb_enemy_num):
     if chase_enemy_num:
@@ -163,9 +165,15 @@ while running:
                         all_sprites.add(tanks)
 
                 if enemy.hp <= 0:
+                    # 確率でヒールをドロップ
+                    if random.random() > 0.5:
+                        heals.add(Heal(enemy.get_pos()))
+                        all_sprites.add(heals)
                     enemy.kill()
 
-
+        #ヒールの当たり判定
+        if pygame.sprite.spritecollide(player, heals, True):
+            player_life.gain_life()
 
         # ライフが0になったらゲーム終了
         if player_life.current_lives <= 0:
@@ -176,6 +184,9 @@ while running:
         background.update()
         background.draw(screen)
         all_sprites.draw(screen)
+
+        heals.draw(screen)
+
 
         screen.blit(timer_text, (650, 10))
 
@@ -320,6 +331,7 @@ while running:
         bullets = pygame.sprite.Group()
         enemy_projectiles = pygame.sprite.Group()
         tanks = pygame.sprite.Group()
+        heals = pygame.sprite.Group()
 
         player = Player(screen, all_sprites, bullets)
         #enemy = Enemy(screen, all_sprites, enemy_projectiles)
@@ -346,6 +358,7 @@ while running:
         all_sprites.add(enemies)
         all_sprites.add(bullets)
         all_sprites.add(enemy_projectiles)
+        all_sprites.add(heals)
 
         player_life = Life(max_lives=30)
         boss_life = Life(max_lives=30, position=(390,460), image='assets/heart_blue.png')
