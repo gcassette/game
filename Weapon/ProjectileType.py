@@ -84,10 +84,10 @@ class BulletLinerly(Projectile):
     #     pygame.draw.circle(image, self.COLOR, self.SPRITE_COORDINATE, self.SPRITE_RADIUS)  # 赤オレンジの火の玉
     #     return image
     def create_image(self) -> pygame.Surface:
-        image = pygame.Surface(self.SIZE, pygame.SRCALPHA)
-        image.fill(self.COLOR)
-        pygame.draw.circle(image, (255, 255, 0), self.SPRITE_COORDINATE, self.SPRITE_RADIUS)  # 弾本体を黄色に
-        print("create_image")
+        image = pygame.image.load("assets/calcium_bullet.png").convert_alpha()
+        # image.fill(self.COLOR)
+        # pygame.draw.circle(image, (255, 255, 0), self.SPRITE_COORDINATE, self.SPRITE_RADIUS)  # 弾本体を黄色に
+        # print("create_image")
         return image
     def clone(self):
         return BulletLinerly(self.get_position, self.shoot_direction, self.screen)

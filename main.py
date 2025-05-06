@@ -90,7 +90,7 @@ while running:
         # レベル構成
         if wave_init:
             if wave == 1:
-                generate_enemies(1,0,0,0)
+                generate_enemies(1,0,0,1)
             elif wave == 2:
                 generate_enemies(1,0,0,0)
             elif wave == 3:       

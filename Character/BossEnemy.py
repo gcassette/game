@@ -28,6 +28,11 @@ class BossEnemy(Character):
         self.shoot_timer2 = 0
         self.shoot_interval2 = 150  # 直進弾の発射間隔（調整可）
 
+        self.tank_group = tank_group  # 戦車グループ
+        self.summon_timer = 0
+        self.summon_interval = 300  # 5秒ごとに戦車召喚（60FPS前提）
+
+
         mask_surface = pygame.Surface(self.image.get_size(), pygame.SRCALPHA)
         pygame.draw.circle(mask_surface, (255, 255, 255), self.image.get_rect().center, 30)
         self.mask = pygame.mask.from_surface(mask_surface)
@@ -58,6 +63,11 @@ class BossEnemy(Character):
             if self.shoot_timer2 >= self.shoot_interval2:
                 self.shoot_timer2 = 0
                 self.fire_straight()
+        #戦車召喚
+        self.summon_timer += 1
+        if self.summon_timer >= self.summon_interval:
+            self.summon_timer = 0
+            self.fire_tank()
 
     def fire_homing(self):
         bullet_pos = self.pos.xy
@@ -86,6 +96,17 @@ class BossEnemy(Character):
         self.weapon.projectiles_group.add(straight)
         self.weapon.all_sprites.add(straight)
 
+    def fire_tank(self):
+        # 左上固定座標に戦車を召喚（例: x=10）
+        tank = Tank(
+            screen=self.screen,
+            all_sprites=self.weapon.all_sprites,
+            tank_group=self.tank_group,
+            start_pos=(10, 0),  # 左上から落ちる位置
+            speed=4
+        )
+
+
 
 
 
@@ -107,6 +128,7 @@ class HomingFireball(Projectile):
         self.has_avoided = False
         self.avoid_direction = None  # 回り込み成功後の固定方向
 
+        
 
 
     def create_image(self) -> pygame.Surface:
