@@ -63,11 +63,7 @@ class BossEnemy(Character):
             if self.shoot_timer2 >= self.shoot_interval2:
                 self.shoot_timer2 = 0
                 self.fire_straight()
-        # #戦車召喚
-        # self.summon_timer += 1
-        # if self.summon_timer >= self.summon_interval:
-        #     self.summon_timer = 0
-        #     self.fire_tank()
+
 
     def fire_homing(self):
         bullet_pos = self.pos.xy
@@ -95,22 +91,6 @@ class BossEnemy(Character):
         straight.drawing_shoot()
         self.weapon.projectiles_group.add(straight)
         self.weapon.all_sprites.add(straight)
-
-    # def fire_tank(self):
-    #     # 左上固定座標に戦車を召喚（例: x=10）
-    #     tank = Tank(
-    #         screen=self.screen,
-    #         all_sprites=self.weapon.all_sprites,
-    #         tank_group=self.tank_group,
-    #         start_pos=(10, 0),  # 左上から落ちる位置
-    #         speed=4
-    #     )
-
-
-
-
-
-
 
 
 class HomingFireball(Projectile):

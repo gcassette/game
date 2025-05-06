@@ -30,17 +30,6 @@ class WanderEnemy(Character):
         ]
 
         self.direction = random.choice(directions) * self.speed
-
-        # # 左右反転状態を記録
-        # if self.direction.x < 0:
-        #     self.image = pygame.transform.flip(self.original_image, True, False)
-        #     self.mask = pygame.mask.from_surface(self.image)  # ← 画像変更後に再生成
-        #     self.facing_left = True
-        # elif self.direction.x > 0:
-        #     self.image = self.original_image.copy()
-        #     self.mask = pygame.mask.from_surface(self.image)  # ← 画像変更後に再生成
-        #     self.facing_left = False
-        # 上下（x == 0）の場合は向きそのまま
         self.rect = self.image.get_rect(center=self.rect.center)
 
     def set_bullets(self):
