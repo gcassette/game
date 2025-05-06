@@ -78,17 +78,18 @@ while running:
         time_ramaining = TIME_LIMIT - elapsed_sec + level_start_time
         timer_text = font.render(f"Time: {time_ramaining}s", True, (255, 255, 255))
         # --- 衝突判定 ---
-
         if collided_enemies := pygame.sprite.spritecollide(player, enemies, False, collided=pygame.sprite.collide_mask):
-            if not player.invincible:  # ← この条件を追加
+            if not player.invincible:
                 player_life.lose_life()
                 damage_sound.play()
                 player.trigger_invincibility(duration_frames=300)
                 print("Player hit by enemy!")
 
             for collided_enemy in collided_enemies:
+                print(f"[DEBUG] Player pos: {player.pos}, Collided with {type(collided_enemy).__name__} at {collided_enemy.pos}")
                 if isinstance(collided_enemy, ChaseEnemy):
                     collided_enemy.trigger_cooldown(frames=120)
+
 
 
 
@@ -259,10 +260,10 @@ while running:
         #all_sprites.add(enemy)
         #all_sprites.add(wander_enemy)
         #all_sprites.add(chase_enemy)
-        #all_sprites.add(linear_enemy)
+        all_sprites.add(linear_enemy)
         all_sprites.add(bossenemy)  # ← これを忘れている
 
-        enemies.add(wander_enemy, chase_enemy)  # ← ここ追加
+        #enemies.add(wander_enemy, chase_enemy)  # ← ここ追加
         enemies.add(linear_enemy)  # ← ここ追加
         enemies.add(bossenemy)
 

@@ -42,6 +42,12 @@ class Player(Character):
                 self.invincible = False
 
         keys = pygame.key.get_pressed()
+
+         # --- Shiftキーによる速度変更 ---
+        if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
+            self.speed = 3 * SPEED_PLAYER
+        else:
+            self.speed = SPEED_PLAYER
         if keys[pygame.K_w]:
             self.angle += ROTATE_SPEED
         if keys[pygame.K_s]:

@@ -4,12 +4,15 @@ import random
 from Character.Character import Character
 from Weapon.ProjectileType import Projectile  # 自作のProjectile型を使ってる前提
 
+
+
 IMG_BOSS = 'assets//gachigire.png'
 
 class BossEnemy(Character):
     def __init__(self, screen, all_sprites, enemy_projectiles, get_player_pos):
-        start_pos = (780, 300)  # 画面右端に出現
+        start_pos = (600, 300)  # 画面右端に出現
         super().__init__(IMG_BOSS, start_pos, all_sprites, enemy_projectiles, speed=1.5, max_hp=30)
+
 
         self.screen = screen
         self.get_player_pos = get_player_pos
@@ -21,10 +24,18 @@ class BossEnemy(Character):
 
         self.shoot_timer = 0
         self.shoot_interval = 90  # ホーミング弾を1.5秒ごとに撃つ
+
+        mask_surface = pygame.Surface(self.image.get_size(), pygame.SRCALPHA)
+        pygame.draw.circle(mask_surface, (255, 255, 255), self.image.get_rect().center, 30)
+        self.mask = pygame.mask.from_surface(mask_surface)
+
+
     def set_bullets(self):
         pass  # 今は攻撃に直接 FireBall を使っているので空でOK
 
     def update(self):
+        player_pos = self.get_player_pos()
+
         # 上下に往復移動
         self.move_timer += 1
         if self.move_timer >= self.move_interval:
@@ -39,22 +50,12 @@ class BossEnemy(Character):
             self.fire_homing()
 
     def fire_homing(self):
-        """choose_move_directionを用いたホーミング弾の発射"""
-        player_pos = pygame.math.Vector2(self.get_player_pos())
-        # move_dx, move_dy = self.choose_move_direction(
-        #     x=self.pos.x,
-        #     y=self.pos.y,
-        #     px=player_pos.x,
-        #     py=player_pos.y,
-        #     dx=1.0, dy=0.0,
-        #     sigma=150.0, t=1.0,
-        #     step=1.0
-        # )
-        bullet_pos = self.pos.xy  # ボスの現在位置をコピー
+        bullet_pos = self.pos.xy
+        direction_to_player = (self.get_player_pos() - self.pos).normalize()
 
         homing = HomingFireball(
-            lambda: pygame.math.Vector2(bullet_pos),  # 発射時点の位置を固定コピー
-            lambda: pygame.math.Vector2(1, 0),
+            lambda: pygame.math.Vector2(bullet_pos),                     # 発射位置を固定コピー
+            lambda: direction_to_player,                                 # 初期向き = プレイヤーへの向き
             self.screen,
             self.get_player_pos
         )
@@ -62,38 +63,11 @@ class BossEnemy(Character):
         self.weapon.projectiles_group.add(homing)
         self.weapon.all_sprites.add(homing)
 
-    # def choose_move_direction(self, x, y, px, py, dx, dy, sigma=100.0, t=1.0, step=1.0):
-    #     directions = [
-    #         (1, 0), (-1, 0), (0, 1), (0, -1),
-    #         (1, 1), (1, -1), (-1, 1), (-1, -1)
-    #     ]
-
-    #     def f_modified(x, y, px, py, dx, dy, sigma, t):
-    #         rx, ry = x - px, y - py
-    #         r_len = math.hypot(rx, ry)
-    #         w = math.exp(-r_len ** 2 / (sigma ** 2))
-    #         d_len = math.hypot(dx, dy)
-    #         cos_theta = (rx * dx + ry * dy) / (r_len * d_len + 1e-8)
-    #         b = math.exp(-((cos_theta + 1) ** 2) / (2 * 0.4 ** 2))
-    #         return w * b
-
-    #     best_f = float('-inf')
-    #     best_dir = (0, 0)
-    #     for dx_step, dy_step in directions:
-    #         nx = x + dx_step * step
-    #         ny = y + dy_step * step
-    #         val = f_modified(nx, ny, px, py, dx, dy, sigma, t)
-    #         if val > best_f:
-    #             best_f = val
-    #             best_dir = (dx_step, dy_step)
-
-    #     length = math.hypot(*best_dir)
-    #     return (best_dir[0] / length, best_dir[1] / length) if length else (0.0, 0.0)
 
 
-import pygame
-import math
-from Weapon.ProjectileType import Projectile
+
+
+
 
 class HomingFireball(Projectile):
     SIZE = (12, 12)
@@ -107,6 +81,10 @@ class HomingFireball(Projectile):
         self.get_player_pos = get_player_pos
         self.pos = pygame.math.Vector2(0, 0)  # 初期化
         self.velocity = pygame.math.Vector2(0, 0)
+        self.has_avoided = False
+        self.avoid_direction = None  # 回り込み成功後の固定方向
+
+
 
     def create_image(self) -> pygame.Surface:
         image = pygame.Surface(self.SIZE, pygame.SRCALPHA)
@@ -128,20 +106,38 @@ class HomingFireball(Projectile):
         self.velocity = pygame.math.Vector2(0, 0)  # 初期は静止、次の update で追尾
         self.beam_sound.play()
 
+
+
     def update(self):
         if not self.enable:
             return
 
-
-
-        # プレイヤーを追いかける向きを毎フレーム計算
         player_pos = self.get_player_pos()
-        move_dx, move_dy = self.choose_move_direction(
-            x=self.pos.x, y=self.pos.y,
-            px=player_pos.x, py=player_pos.y,
-            dx=1.0, dy=0.0, sigma=100.0, t=1.0, step=1.0
-        )
-        self.velocity = pygame.math.Vector2(move_dx, move_dy) * self.SPEED
+        current_dir = self.velocity.normalize() if self.velocity.length_squared() > 0 else pygame.math.Vector2(1, 0)
+        direction_to_player = (player_pos - self.pos).normalize()
+
+        if not self.has_avoided:
+            vec_from_player = self.pos - player_pos
+            vec_from_player = vec_from_player.normalize()
+            player_forward = pygame.math.Vector2(1, 0)
+
+            cos_theta = player_forward.dot(vec_from_player)
+            distance = (self.pos - player_pos).length()
+
+            print(f"[DEBUG] cosθ: {cos_theta:.3f}, Player→Bullet dist: {distance:.2f}, BulletPos: {self.pos}, PlayerPos: {player_pos}")
+
+            if cos_theta < -0.7:
+                self.has_avoided = True
+                self.avoid_direction = (player_pos - self.pos).normalize()
+                print("[DEBUG] 回り込み成功 -> 突進モード移行")
+
+        # 動作切り替え
+        if self.has_avoided:
+            self.velocity = self.avoid_direction * self.SPEED  # ← 固定方向に直進
+        else:
+            desired_dir = self.choose_around_direction(self.pos, player_pos, current_dir)
+            self.velocity = (self.velocity * 0.85 + desired_dir * 0.15).normalize() * self.SPEED
+
 
         self.pos += self.velocity
         self.rect.center = (round(self.pos.x), round(self.pos.y))
@@ -149,30 +145,48 @@ class HomingFireball(Projectile):
         if not self.screen.get_rect().colliderect(self.rect):
             self.kill()
 
-    def choose_move_direction(self, x, y, px, py, dx, dy, sigma=100.0, t=1.0, step=1.0):
-        directions = [
-            (1, 0), (-1, 0), (0, 1), (0, -1),
-            (1, 1), (1, -1), (-1, 1), (-1, -1)
-        ]
 
-        def f_modified(x, y, px, py, dx, dy, sigma, t):
-            rx, ry = x - px, y - py
-            r_len = math.hypot(rx, ry)
-            w = math.exp(-r_len ** 2 / (sigma ** 2))
-            d_len = math.hypot(dx, dy)
-            cos_theta = (rx * dx + ry * dy) / (r_len * d_len + 1e-8)
-            b = math.exp(-((cos_theta + 1) ** 2) / (2 * 0.4 ** 2))
-            return w * b
 
-        best_f = float('-inf')
-        best_dir = (0, 0)
-        for dx_step, dy_step in directions:
-            nx = x + dx_step * step
-            ny = y + dy_step * step
-            val = f_modified(nx, ny, px, py, dx, dy, sigma, t)
-            if val > best_f:
-                best_f = val
-                best_dir = (dx_step, dy_step)
 
-        length = math.hypot(*best_dir)
-        return (best_dir[0] / length, best_dir[1] / length) if length else (0.0, 0.0)
+
+    def choose_around_direction(self, pos, target, forward_dir, epsilon=1.0):
+        """
+        pos: 現在の位置（Vector2）
+        target: プレイヤー位置（Vector2）
+        forward_dir: 現在の進行方向（Vector2）
+        epsilon: 微小変化量（勾配の差分ステップ）
+        """
+
+
+
+        def potential(p):
+            fake_target = target  # ← 参照点を左にズラす
+            to_player = fake_target - p
+            dist = to_player.length()
+            if dist == 0:
+                return -float('inf')
+
+            to_player_norm = to_player.normalize()
+            forward_norm = forward_dir.normalize()
+
+            # 距離に応じた重み: 理想距離で最大、それより近くても遠くても減少
+            dist_opt = 200   # 理想的な接近距離（要調整）
+            sigma = 50       # 鋭さ（広がり）
+            w1 = math.exp(-((dist - dist_opt) ** 2) / (2 * sigma ** 2))
+
+            # 正面回避（正面 cosθ ≒ 1 → スコア小、背面 cosθ ≒ -1 → スコア大）
+            cos_theta = forward_norm.dot(to_player_norm)
+            w2 = math.exp(-((cos_theta + 1) ** 2) / (2 * 0.4 ** 2))
+
+            return w1 * w2
+        dx = (potential(pos + pygame.math.Vector2(epsilon, 0)) - potential(pos - pygame.math.Vector2(epsilon, 0))) / (2 * epsilon)
+        dy = (potential(pos + pygame.math.Vector2(0, epsilon)) - potential(pos - pygame.math.Vector2(0, epsilon))) / (2 * epsilon)
+
+        grad = pygame.math.Vector2(dx, dy)
+
+        if grad.length_squared() == 0:
+            return forward_dir.normalize()
+        else:
+            return grad.normalize()
+
+
